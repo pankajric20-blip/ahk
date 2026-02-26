@@ -6,3 +6,6 @@ dist
 .expo
 .turbo
 coverage
+
+# Vercel
+.vercel
