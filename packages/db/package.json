@@ -1,0 +1,10 @@
+{
+    "name": "@aihkya/db",
+    "version": "1.0.0",
+    "private": true,
+    "main": "client.ts",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.0",
+        "@supabase/ssr": "^0.1.0"
+    }
+}
