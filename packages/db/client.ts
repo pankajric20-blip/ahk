@@ -2,8 +2,14 @@ import {
   createBrowserClient as createBrowser,
   createServerClient as createServer,
 } from "@supabase/ssr";
-import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import type { Database } from "./types";
+
+// Simple interface compatible with both ReadonlyRequestCookies and RequestCookies
+// Avoids importing from fragile Next.js internal paths
+interface CookieStore {
+  getAll(): Array<{ name: string; value: string }>;
+  set?(name: string, value: string, options?: Record<string, unknown>): void;
+}
 
 export function createBrowserClient(
   supabaseUrl: string,
@@ -15,7 +21,7 @@ export function createBrowserClient(
 export function createServerClient(
   supabaseUrl: string,
   supabaseAnonKey: string,
-  cookieStore: ReadonlyRequestCookies,
+  cookieStore: CookieStore,
 ) {
   return createServer<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
