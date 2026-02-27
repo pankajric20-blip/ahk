@@ -1,25 +1,36 @@
 {
-    "name": "aihkya-platform",
-    "private": true,
-    "engines": {
-        "node": ">=20",
-        "pnpm": ">=9"
-    },
-    "scripts": {
-        "build": "turbo run build",
-        "dev": "turbo run dev",
-        "lint": "turbo run lint",
-        "type-check": "turbo run type-check",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\""
-    },
-    "devDependencies": {
-        "@supabase/supabase-js": "^2.39.0",
-        "@types/pg": "^8.16.0",
-        "dotenv": "^17.3.1",
-        "pg": "^8.19.0",
-        "prettier": "^3.2.5",
-        "supabase": "^2.76.15",
-        "turbo": "^1.13.0"
-    },
-    "packageManager": "pnpm@9.0.0"
+  "name": "aihkya-platform",
+  "private": true,
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "@types/pg": "^8.16.0",
+    "dotenv": "^17.3.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "pg": "^8.19.0",
+    "prettier": "^3.2.5",
+    "supabase": "^2.76.15",
+    "turbo": "^1.13.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "packageManager": "pnpm@9.0.0"
 }
