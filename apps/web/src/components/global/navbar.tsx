@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Globe, Menu } from "lucide-react";
 import { SearchInput } from "./search-input";
 import { Suspense } from "react";
@@ -22,8 +23,15 @@ export async function Navbar() {
       <div className="container mx-auto flex h-16 items-center px-4 justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl inline-block text-primary">
-              aihkya<span className="text-foreground">.com</span>
+            <Image
+              src="/logo.png"
+              alt="AihKya Logo"
+              width={28}
+              height={28}
+              className="rounded-md"
+            />
+            <span className="font-bold text-xl inline-block text-foreground">
+              Aih<span className="text-primary">Kya</span>
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">

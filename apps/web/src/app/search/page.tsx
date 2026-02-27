@@ -2,8 +2,9 @@
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ToolLogo } from "@/components/tool/tool-logo";
+import { BackButton } from "@/components/global/back-button";
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -58,13 +59,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl min-h-[60vh]">
       <div className="mb-8">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
-        </Link>
+        <BackButton fallbackHref="/" label="Back to Home" />
         <h1 className="text-3xl font-bold tracking-tight mb-2">
           {q ? `Search results for "${q}"` : "Search AI Tools"}
         </h1>

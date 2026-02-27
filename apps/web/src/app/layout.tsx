@@ -11,9 +11,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aihkya - Discover AI Tools",
+  title: "AihKya - Discover AI Tools",
   description:
     "India's first Hindi-first AI tools discovery and learning platform.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

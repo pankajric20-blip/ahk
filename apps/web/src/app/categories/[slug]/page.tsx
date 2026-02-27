@@ -3,11 +3,15 @@ import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Filter } from "lucide-react";
+import { ArrowRight, Filter } from "lucide-react";
 import { ToolLogo } from "@/components/tool/tool-logo";
+import { BackButton } from "@/components/global/back-button";
+import { PricingFilter } from "./pricing-filter";
+import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ pricing?: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -34,8 +38,13 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const p = await params;
+  const sp = await searchParams;
+
+  // Parse active pricing filters from URL (?pricing=Free,Paid)
+  const activePricing = sp.pricing ? sp.pricing.split(",").filter(Boolean) : [];
+
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,7 +66,7 @@ export default async function CategoryPage({ params }: Props) {
 
   // Fetch tools in category
   // Note: tools.category is a text column (e.g. 'Content Creation'), not a FK
-  const { data: categoryTools } = await supabase
+  let query = supabase
     .from("tools")
     .select("*")
     .eq("category", category.name)
@@ -65,29 +74,40 @@ export default async function CategoryPage({ params }: Props) {
     .order("is_sponsored", { ascending: false })
     .order("rating", { ascending: false });
 
+  // Apply pricing filter if any are selected
+  if (activePricing.length > 0) {
+    query = query.in("pricing_model", activePricing);
+  }
+
+  const { data: categoryTools } = await query;
+  const tools = categoryTools ?? [];
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <Link
-        href="/categories"
-        className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-8 transition-colors"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        All Categories
-      </Link>
+      {/* Back button — goes to browser history; falls back to /categories */}
+      <div className="mb-8">
+        <BackButton fallbackHref="/categories" label="All Categories" />
+      </div>
 
       <div className="mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">
           {category.name} Tools
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
-          Browse our curated collection of {categoryTools?.length || 0} AI
+          Browse our curated collection of{" "}
+          <span className="text-foreground font-medium">{tools.length}</span> AI
           platforms specifically targeted for {category.name.toLowerCase()}{" "}
           workflows.
+          {activePricing.length > 0 && (
+            <span className="ml-1 text-sm text-primary">
+              (filtered: {activePricing.join(", ")})
+            </span>
+          )}
         </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Filters Sidebar (Mocked for now) */}
+        {/* Filters Sidebar */}
         <div className="w-full md:w-64 shrink-0 space-y-6">
           <div className="flex items-center gap-2 font-semibold text-lg border-b pb-2">
             <Filter className="h-5 w-5" /> Filters
@@ -95,39 +115,26 @@ export default async function CategoryPage({ params }: Props) {
 
           <div className="space-y-3">
             <h4 className="font-medium">Pricing</h4>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-input text-primary focus:ring-primary"
-                />
-                Free
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-input text-primary focus:ring-primary"
-                />
-                Freemium
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-input text-primary focus:ring-primary"
-                />
-                Paid
-              </label>
-            </div>
+            {/* Suspense needed because PricingFilter uses useSearchParams */}
+            <Suspense
+              fallback={
+                <div className="text-sm text-muted-foreground">
+                  Loading filters…
+                </div>
+              }
+            >
+              <PricingFilter selected={activePricing} />
+            </Suspense>
           </div>
         </div>
 
         {/* Tools Grid */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoryTools && categoryTools.length > 0 ? (
-            categoryTools.map((tool: any) => (
+          {tools.length > 0 ? (
+            tools.map((tool: any) => (
               <div
                 key={tool.id}
-                className="group flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden h-full"
+                className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden h-full"
               >
                 <div className="p-6 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-4">
@@ -169,9 +176,19 @@ export default async function CategoryPage({ params }: Props) {
             ))
           ) : (
             <div className="col-span-full py-12 text-center border rounded-xl border-dashed bg-muted/20">
-              <p className="text-muted-foreground">
-                No tools found in this category yet.
+              <p className="text-muted-foreground text-lg">
+                {activePricing.length > 0
+                  ? `No ${activePricing.join(" / ")} tools found in this category.`
+                  : "No tools found in this category yet."}
               </p>
+              {activePricing.length > 0 && (
+                <Link
+                  href={`/categories/${p.slug}`}
+                  className="mt-4 inline-flex items-center justify-center h-9 px-4 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  Clear filters
+                </Link>
+              )}
             </div>
           )}
         </div>

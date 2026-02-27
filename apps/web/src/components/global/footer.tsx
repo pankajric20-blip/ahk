@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t py-12 bg-muted/20">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
-          <h3 className="font-bold text-lg text-primary">aihkya.com</h3>
+          <h3 className="font-bold text-lg text-primary">AihKya</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
             India&apos;s first Hindi-first AI tools discovery platform.
             Empowering everyone to leverage the power of Artificial
@@ -26,7 +26,7 @@ export function Footer() {
             </li>
             <li>
               <Link
-                href="/search?q=free"
+                href="/free"
                 className="hover:text-foreground transition-colors"
               >
                 Free Tools
