@@ -1,4 +1,5 @@
 import { Send, Globe, FileText, Tag, DollarSign } from "lucide-react";
+import { SubmitButton } from "./submit-button";
 
 export const metadata = {
   title: "Submit a Tool | Aihkya",
@@ -165,17 +166,7 @@ export default function SubmitToolPage() {
           />
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="button"
-          className="w-full h-11 flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-          onClick={() =>
-            alert("Thank you! We'll review your submission and add it shortly.")
-          }
-        >
-          <Send className="h-4 w-4" />
-          Submit for Review
-        </button>
+        <SubmitButton />
 
         <p className="text-xs text-muted-foreground text-center">
           All submissions are reviewed by our team before being listed. We
