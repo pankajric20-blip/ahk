@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
+import { ToolLogo } from "@/components/tool/tool-logo";
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -12,13 +13,26 @@ export default async function Home() {
     cookieStore,
   );
 
-  // Fetch featured tools
-  const { data: featuredTools } = await supabase
+  // Fetch featured/sponsored tools — fall back to top-rated published tools
+  // if none are explicitly marked as featured in the DB yet.
+  let { data: featuredTools } = await supabase
     .from("tools")
     .select("*")
     .eq("status", "published")
     .or("is_featured.eq.true,is_sponsored.eq.true")
+    .order("rating", { ascending: false })
     .limit(6);
+
+  // Fallback: if no featured/sponsored tools, show highest-rated published tools
+  if (!featuredTools || featuredTools.length === 0) {
+    const { data: topTools } = await supabase
+      .from("tools")
+      .select("*")
+      .eq("status", "published")
+      .order("rating", { ascending: false })
+      .limit(6);
+    featuredTools = topTools;
+  }
 
   // Fetch popular categories
   const { data: categories } = await supabase
@@ -101,17 +115,11 @@ export default async function Home() {
                     <div className="flex flex-col p-6 h-full">
                       <div className="flex justify-between items-start mb-4">
                         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
-                          {tool.logo_url ? (
-                            <img
-                              src={tool.logo_url}
-                              alt={tool.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="font-bold text-lg">
-                              {tool.name.charAt(0)}
-                            </span>
-                          )}
+                          <ToolLogo
+                            logoUrl={tool.logo_url}
+                            name={tool.name}
+                            size="lg"
+                          />
                         </div>
                         <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
                           {tool.pricing_model}

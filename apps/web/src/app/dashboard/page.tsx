@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { LogOut, Bookmark, Star, Settings, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { ToolLogo } from "@/components/tool/tool-logo";
 
 export const metadata = {
   title: "Dashboard | Aihkya",
@@ -128,17 +129,11 @@ export default async function DashboardPage() {
                   <div className="p-5 flex flex-col h-full">
                     <div className="flex justify-between items-start mb-4">
                       <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-                        {tool.logo_url ? (
-                          <img
-                            src={tool.logo_url}
-                            alt={tool.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="font-bold text-sm">
-                            {tool.name.charAt(0)}
-                          </span>
-                        )}
+                        <ToolLogo
+                          logoUrl={tool.logo_url}
+                          name={tool.name}
+                          size="md"
+                        />
                       </div>
                       <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] uppercase font-bold bg-secondary text-secondary-foreground">
                         {tool.pricing_model}

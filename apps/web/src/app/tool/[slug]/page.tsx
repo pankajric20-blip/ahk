@@ -10,6 +10,7 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { BookmarkButton } from "@/components/tool/bookmark-button";
+import { ToolLogo } from "@/components/tool/tool-logo";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -117,17 +118,7 @@ export default async function ToolDetailsPage({ params }: Props) {
           {/* Header */}
           <div className="flex items-start gap-6">
             <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center border shrink-0 overflow-hidden">
-              {tool.logo_url ? (
-                <img
-                  src={tool.logo_url}
-                  alt={tool.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="font-bold text-4xl text-muted-foreground">
-                  {tool.name.charAt(0)}
-                </span>
-              )}
+              <ToolLogo logoUrl={tool.logo_url} name={tool.name} size="lg" />
             </div>
             <div>
               <div className="flex items-center gap-3 mb-2">
