@@ -17,13 +17,28 @@ export function Footer() {
           <h4 className="font-semibold">Discover</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <Link href="/categories">All Categories</Link>
+              <Link
+                href="/categories"
+                className="hover:text-foreground transition-colors"
+              >
+                All Categories
+              </Link>
             </li>
             <li>
-              <Link href="/free">Free Tools</Link>
+              <Link
+                href="/search?q=free"
+                className="hover:text-foreground transition-colors"
+              >
+                Free Tools
+              </Link>
             </li>
             <li>
-              <Link href="/new">Newly Added</Link>
+              <Link
+                href="/search?q="
+                className="hover:text-foreground transition-colors"
+              >
+                All Tools
+              </Link>
             </li>
           </ul>
         </div>
@@ -32,10 +47,20 @@ export function Footer() {
           <h4 className="font-semibold">For Creators</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <Link href="/submit">Submit Tool</Link>
+              <Link
+                href="/new"
+                className="hover:text-foreground transition-colors"
+              >
+                Submit a Tool
+              </Link>
             </li>
             <li>
-              <Link href="/sponsor">Sponsor Listing</Link>
+              <Link
+                href="/sponsor"
+                className="hover:text-foreground transition-colors"
+              >
+                Sponsor a Listing
+              </Link>
             </li>
           </ul>
         </div>
@@ -44,10 +69,20 @@ export function Footer() {
           <h4 className="font-semibold">Legal</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <Link href="/privacy">Privacy Policy</Link>
+              <Link
+                href="/privacy"
+                className="hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
             </li>
             <li>
-              <Link href="/terms">Terms of Service</Link>
+              <Link
+                href="/terms"
+                className="hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>
             </li>
           </ul>
         </div>

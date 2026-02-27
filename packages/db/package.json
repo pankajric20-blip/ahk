@@ -9,7 +9,7 @@
     "./types": "./types.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "@supabase/ssr": "^0.1.0"
+    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/ssr": "^0.5.2"
   }
 }
