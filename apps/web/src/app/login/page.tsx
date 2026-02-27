@@ -66,7 +66,7 @@ function AuthForm() {
       }}
       theme="dark" // We default to dark mode in layout.tsx
       providers={["google"]}
-      redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`}
+      redirectTo={`${typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`}
     />
   );
 }

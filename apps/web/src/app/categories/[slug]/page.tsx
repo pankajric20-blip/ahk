@@ -56,10 +56,11 @@ export default async function CategoryPage({ params }: Props) {
   }
 
   // Fetch tools in category
+  // Note: tools.category is a text column (e.g. 'Content Creation'), not a FK
   const { data: categoryTools } = await supabase
     .from("tools")
     .select("*")
-    .eq("category_id", category.id)
+    .eq("category", category.name)
     .eq("status", "published")
     .order("is_sponsored", { ascending: false })
     .order("rating", { ascending: false });
