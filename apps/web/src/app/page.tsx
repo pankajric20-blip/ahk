@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { createServerClient } from "@aihkya/db";

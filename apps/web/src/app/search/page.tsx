@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -33,17 +33,25 @@ export default async function SearchPage({ searchParams }: Props) {
   let searchResults: any[] = [];
 
   if (q) {
-    // Basic ILIKE search against name, description_en, and description_hi
-    const { data } = await supabase
-      .from("tools")
-      .select("*")
-      .eq("status", "published")
-      .or(
-        `name.ilike.%${q}%,description_en.ilike.%${q}%,description_hi.ilike.%${q}%`,
-      )
-      .order("rating", { ascending: false });
+    // Sanitize: strip PostgREST operator characters that could alter the .or() filter string.
+    // Supabase parameterises values in .ilike(), but .or() uses string interpolation.
+    const safeQ = q
+      .trim()
+      .slice(0, 200) // cap length to prevent abuse
+      .replace(/[%*():,]/g, ""); // strip PostgREST / SQL wildcards
 
-    if (data) searchResults = data;
+    if (safeQ) {
+      const { data } = await supabase
+        .from("tools")
+        .select("*")
+        .eq("status", "published")
+        .or(
+          `name.ilike.%${safeQ}%,description_en.ilike.%${safeQ}%,description_hi.ilike.%${safeQ}%`,
+        )
+        .order("rating", { ascending: false });
+
+      if (data) searchResults = data;
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -7,9 +7,9 @@ import {
   ArrowLeft,
   CheckCircle2,
   ExternalLink,
-  BookmarkPlus,
   PlayCircle,
 } from "lucide-react";
+import { BookmarkButton } from "@/components/tool/bookmark-button";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -51,18 +51,42 @@ export default async function ToolDetailsPage({ params }: Props) {
   // Fetch tool data with category info
   const { data: dbTool } = await supabase
     .from("tools")
-    .select(
-      `
-      *,
-      category:categories(name, slug)
-    `,
-    )
+    .select("*")
     .eq("slug", p.slug)
     .single();
+
+  const anyTool: any = dbTool;
+  let toolCategory: any = null;
+
+  if (anyTool && anyTool.category) {
+    const { data: catData } = await supabase
+      .from("categories")
+      .select("name, slug")
+      .eq("name", anyTool.category)
+      .single();
+    toolCategory = catData;
+  }
+
   const tool: any = dbTool;
 
   if (!tool) {
     notFound();
+  }
+
+  // Check if user has bookmarked this tool
+  let initialBookmarked = false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: bookmark } = await supabase
+      .from("bookmarks")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("tool_id", tool.id)
+      .single();
+    if (bookmark) initialBookmarked = true;
   }
 
   // Helper to extract YouTube ID for generic embeds if full URL is given
@@ -117,15 +141,15 @@ export default async function ToolDetailsPage({ params }: Props) {
               </p>
               {tool.description_hi && (
                 <p className="text-base text-muted-foreground/80 font-hindi mb-4 italic border-l-2 border-primary/30 pl-3">
-                  "{tool.description_hi}"
+                  &quot;{tool.description_hi}&quot;
                 </p>
               )}
-              {tool.category && (
+              {toolCategory && (
                 <Link
-                  href={`/categories/${(tool.category as any).slug}`}
+                  href={`/categories/${toolCategory.slug}`}
                   className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-accent text-accent-foreground hover:bg-accent/80"
                 >
-                  {(tool.category as any).name}
+                  {toolCategory.name}
                 </Link>
               )}
             </div>
@@ -146,6 +170,7 @@ export default async function ToolDetailsPage({ params }: Props) {
                   title="YouTube video player"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 ></iframe>
               </div>
@@ -200,22 +225,36 @@ export default async function ToolDetailsPage({ params }: Props) {
             </dl>
 
             <div className="flex flex-col gap-3 mt-6">
-              {tool.website_url && (
-                <a
-                  href={tool.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 rounded-md font-medium hover:bg-primary/90 transition-colors"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Visit Website
-                </a>
-              )}
+              {tool.website_url &&
+                (() => {
+                  // Only allow http/https URLs to prevent javascript: XSS
+                  let isValidUrl = false;
+                  try {
+                    const parsed = new URL(tool.website_url);
+                    isValidUrl =
+                      parsed.protocol === "https:" ||
+                      parsed.protocol === "http:";
+                  } catch {
+                    isValidUrl = false;
+                  }
+                  return isValidUrl ? (
+                    <a
+                      href={tool.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 rounded-md font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Visit Website
+                    </a>
+                  ) : null;
+                })()}
 
-              <button className="w-full flex items-center justify-center gap-2 border border-input bg-background h-10 rounded-md font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                <BookmarkPlus className="h-4 w-4" />
-                Save Tool
-              </button>
+              <BookmarkButton
+                toolId={tool.id}
+                initialBookmarked={initialBookmarked}
+                slug={tool.slug}
+              />
             </div>
           </div>
 
