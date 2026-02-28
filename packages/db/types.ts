@@ -55,6 +55,7 @@ export interface Database {
           youtube_hindi_url: string | null;
           logo_url: string | null;
           rating: number | null;
+          review_count: number | null;
           is_featured: boolean;
           is_sponsored: boolean;
           status: "draft" | "published" | "disabled";
@@ -74,7 +75,23 @@ export interface Database {
       };
       users: { Row: any; Insert: any; Update: any };
       user_preferences: { Row: any; Insert: any; Update: any };
-      reviews: { Row: any; Insert: any; Update: any };
+      reviews: {
+        Row: {
+          id: number;
+          user_id: string;
+          tool_id: number;
+          rating: number;
+          review_text: string | null;
+          is_verified: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["reviews"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & { updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["reviews"]["Insert"]>;
+      };
       bookmarks: { Row: any; Insert: any; Update: any };
       tool_clicks: { Row: any; Insert: any; Update: any };
       notifications: { Row: any; Insert: any; Update: any };

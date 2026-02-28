@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { BookmarkButton } from "@/components/tool/bookmark-button";
 import { ToolLogo } from "@/components/tool/tool-logo";
+import { RatingForm } from "@/components/tool/rating-form";
+import { ReviewList } from "@/components/tool/review-list";
+import { Star } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -90,6 +93,29 @@ export default async function ToolDetailsPage({ params }: Props) {
     if (bookmark) initialBookmarked = true;
   }
 
+  // Fetch reviews for this tool
+  const { data: reviewsData } = await supabase
+    .from("reviews")
+    .select(
+      `
+      id,
+      rating,
+      review_text,
+      created_at,
+      user_id,
+      user:users(name, avatar_url)
+    `,
+    )
+    .eq("tool_id", tool.id)
+    .order("created_at", { ascending: false });
+
+  const reviews: any[] = (reviewsData as any[]) || [];
+
+  let currentUserReview: any = null;
+  if (user) {
+    currentUserReview = reviews.find((r: any) => r.user_id === user.id) || null;
+  }
+
   // Helper to extract YouTube ID for generic embeds if full URL is given
   const getYoutubeId = (url: string) => {
     const regExp =
@@ -125,6 +151,18 @@ export default async function ToolDetailsPage({ params }: Props) {
                 <h1 className="text-3xl font-bold">{tool.name}</h1>
                 {tool.status === "published" && (
                   <CheckCircle2 className="h-5 w-5 text-blue-500" />
+                )}
+              </div>
+              {/* Rating Summary */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center text-amber-500 font-semibold gap-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 text-sm">
+                  <Star className="h-4 w-4 fill-amber-500" />
+                  {tool.rating || "New"}
+                </div>
+                {tool.review_count > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    ({tool.review_count} review{tool.review_count !== 1 && "s"})
+                  </span>
                 )}
               </div>
               <p className="text-lg text-muted-foreground mb-4">
@@ -177,6 +215,27 @@ export default async function ToolDetailsPage({ params }: Props) {
               </div>
             </div>
           )}
+
+          {/* Reviews Section */}
+          <div className="pt-8 border-t mt-8">
+            <h2 className="text-2xl font-bold mb-6">Reviews & Ratings</h2>
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-full md:w-1/3 shrink-0">
+                <div className="sticky top-6">
+                  <RatingForm
+                    toolId={tool.id}
+                    slug={tool.slug}
+                    isLoggedIn={!!user}
+                    initialRating={currentUserReview?.rating || 0}
+                    initialReview={currentUserReview?.review_text || ""}
+                  />
+                </div>
+              </div>
+              <div className="flex-1 w-full">
+                <ReviewList reviews={reviews as any} />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Sidebar (Right column) */}
