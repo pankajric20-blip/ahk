@@ -3,15 +3,17 @@
 import { useState, useTransition } from "react";
 import { Star, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-
-// The server action
 import { submitReview } from "@/actions/reviews";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RatingFormProps {
-  toolId: number;
+  toolId: string;
   slug: string;
   initialRating?: number;
   initialReview?: string;
+  initialTitle?: string;
+  initialUseCase?: string;
+  initialUsageDuration?: string;
   isLoggedIn: boolean;
 }
 
@@ -20,12 +22,19 @@ export function RatingForm({
   slug,
   initialRating = 0,
   initialReview = "",
+  initialTitle = "",
+  initialUseCase = "",
+  initialUsageDuration = "",
   isLoggedIn,
 }: RatingFormProps) {
   const [rating, setRating] = useState(initialRating);
   const [hoverRating, setHoverRating] = useState(0);
+  const [title, setTitle] = useState(initialTitle);
   const [reviewText, setReviewText] = useState(initialReview);
+  const [useCase, setUseCase] = useState(initialUseCase);
+  const [usageDuration, setUsageDuration] = useState(initialUsageDuration);
   const [isPending, startTransition] = useTransition();
+  const { language } = useLanguage();
 
   const handleRatingClick = (newRating: number) => {
     if (!isLoggedIn) {
@@ -49,9 +58,13 @@ export function RatingForm({
     }
 
     const formData = new FormData();
-    formData.append("tool_id", toolId.toString());
+    formData.append("tool_id", toolId);
     formData.append("rating", rating.toString());
+    formData.append("title", title);
     formData.append("review_text", reviewText);
+    formData.append("use_case", useCase);
+    formData.append("usage_duration", usageDuration);
+    formData.append("language", language);
     formData.append("slug", slug);
 
     startTransition(async () => {
@@ -59,7 +72,9 @@ export function RatingForm({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Review submitted successfully!");
+        toast.success(
+          "Review submitted successfully! Thank you for sharing your thoughts.",
+        );
       }
     });
   };
@@ -69,8 +84,14 @@ export function RatingForm({
       <h3 className="font-semibold text-lg mb-4">Leave a Review</h3>
 
       {!isLoggedIn && (
-        <div className="mb-4 text-sm text-muted-foreground bg-muted p-3 rounded-md border border-dashed">
-          You must be logged in to leave a review and rate this tool.
+        <div className="mb-4 text-sm text-amber-600 bg-amber-500/10 p-3 rounded-md border border-amber-500/20 flex flex-col items-start gap-2">
+          You must be logged in to leave a rich review.
+          <a
+            href="/login"
+            className="px-3 py-1 bg-amber-500/20 text-amber-700 font-semibold rounded text-xs hover:bg-amber-500/30"
+          >
+            Sign In Now
+          </a>
         </div>
       )}
 
@@ -103,24 +124,70 @@ export function RatingForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Your Review (Optional)
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Review Title
+          </label>
+          <input
+            type="text"
+            placeholder="Sum up your experience"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={!isLoggedIn || isPending}
+            className="w-full h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Your Review
           </label>
           <textarea
-            placeholder="What did you like or dislike about this tool?"
+            placeholder="How did this tool help your business or workflow? Did you face any issues?"
             value={reviewText}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setReviewText(e.target.value)
-            }
+            onChange={(e) => setReviewText(e.target.value)}
             disabled={!isLoggedIn || isPending}
             className="min-h-[100px] resize-y w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
+              Use Case
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Sales Calls, Graphic Design"
+              value={useCase}
+              onChange={(e) => setUseCase(e.target.value)}
+              disabled={!isLoggedIn || isPending}
+              className="w-full h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
+              Usage Duration
+            </label>
+            <select
+              value={usageDuration}
+              onChange={(e) => setUsageDuration(e.target.value)}
+              disabled={!isLoggedIn || isPending}
+              className="w-full h-10 rounded-md border border-input bg-background/50 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Select duration...</option>
+              <option value="Just testing">Just testing</option>
+              <option value="Less than 1 month">Less than 1 month</option>
+              <option value="1-6 months">1-6 months</option>
+              <option value="Over 6 months">Over 6 months</option>
+            </select>
+          </div>
+        </div>
+
         <button
           type="submit"
           disabled={!isLoggedIn || isPending || rating === 0}
-          className="w-full sm:w-auto inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+          className="w-full sm:w-auto inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-6 py-2 mt-4"
         >
           {isPending ? (
             <>
@@ -130,7 +197,7 @@ export function RatingForm({
           ) : (
             <>
               <Send className="mr-2 h-4 w-4" />
-              Submit Review
+              Publish Review
             </>
           )}
         </button>

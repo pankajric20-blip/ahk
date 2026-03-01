@@ -34,6 +34,28 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Check if onboarding is completed
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", user.id)
+          .single();
+
+        if (profile && !(profile as any).onboarding_completed) {
+          // If a specific next parameter is provided (e.g. they were trying to save a tool),
+          // pass it along to the onboarding so we can redirect them back afterward.
+          const onboardingUrl = new URL("/onboarding", origin);
+          if (nextParam && nextParam !== "/dashboard") {
+            onboardingUrl.searchParams.set("next", nextParam);
+          }
+          return NextResponse.redirect(onboardingUrl.toString());
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

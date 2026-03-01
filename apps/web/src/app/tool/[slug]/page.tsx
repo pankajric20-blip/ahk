@@ -97,7 +97,10 @@ export default async function ToolDetailsPage({ params }: Props) {
       `
       id,
       rating,
+      title,
       review_text,
+      use_case,
+      usage_duration,
       created_at,
       user_id,
       user:profiles(display_name, avatar_url)
@@ -198,7 +201,12 @@ export default async function ToolDetailsPage({ params }: Props) {
                     slug={tool.slug}
                     isLoggedIn={!!user}
                     initialRating={currentUserReview?.rating || 0}
+                    initialTitle={currentUserReview?.title || ""}
                     initialReview={currentUserReview?.review_text || ""}
+                    initialUseCase={currentUserReview?.use_case || ""}
+                    initialUsageDuration={
+                      currentUserReview?.usage_duration || ""
+                    }
                   />
                 </div>
               </div>

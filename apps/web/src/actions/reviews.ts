@@ -7,7 +7,11 @@ import { revalidatePath } from "next/cache";
 export async function submitReview(formData: FormData) {
   const toolId = formData.get("tool_id") as string;
   const rating = Number(formData.get("rating"));
+  const title = formData.get("title") as string;
   const reviewText = formData.get("review_text") as string;
+  const useCase = formData.get("use_case") as string;
+  const usageDuration = formData.get("usage_duration") as string;
+  const language = formData.get("language") as string;
   const slug = formData.get("slug") as string;
 
   if (!toolId || !rating || rating < 1 || rating > 5) {
@@ -35,7 +39,11 @@ export async function submitReview(formData: FormData) {
       user_id: user.id,
       tool_id: toolId,
       rating,
+      title: title?.trim() || null,
       review_text: reviewText?.trim() || null,
+      use_case: useCase?.trim() || null,
+      usage_duration: usageDuration || null,
+      language: language || null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id, tool_id" },
