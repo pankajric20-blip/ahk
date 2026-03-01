@@ -3,6 +3,11 @@ import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";
+import { CategoryGrid } from "@/components/global/category-grid";
+import {
+  HeroSection,
+  FeaturedSectionHeader,
+} from "@/components/global/localized-sections";
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -53,14 +58,7 @@ export default async function Home() {
             </span>
             <span className="sm:hidden">Hindi-First AI Directory</span>
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-150">
-            Discover the Best <span className="text-primary">AI Tools</span> for
-            Your Workflow
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-            Explore carefully curated AI tools with full Hindi language support,
-            detailed pricing, and Indian alternative recommendations.
-          </p>
+          <HeroSection />
 
           <div className="w-full max-w-2xl relative flex items-center animate-in fade-in slide-in-from-bottom-7 duration-1000 delay-500">
             <form
@@ -89,17 +87,10 @@ export default async function Home() {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-10">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight mb-2">
-                Featured Tools
-              </h2>
-              <p className="text-muted-foreground">
-                Hand-picked AI tools for maximum productivity.
-              </p>
-            </div>
+            <FeaturedSectionHeader />
             <Link
               href="/categories"
-              className="hidden sm:flex items-center text-primary font-medium hover:underline underline-offset-4"
+              className="hidden sm:flex items-center text-primary font-medium hover:underline underline-offset-4 shrink-0"
             >
               View all <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
@@ -143,40 +134,26 @@ export default async function Home() {
       {/* Browse by Category */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">
-              Browse by Category
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Find exactly what you need by exploring our organized collections.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories && categories.length > 0
-              ? categories.map((category: any) => (
-                  <Link
-                    key={category.id}
-                    href={`/categories/${category.slug}`}
-                    className="group flex flex-col items-center justify-center p-6 rounded-xl border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-center"
-                  >
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                      {/* Replace with actual Lucide icon mapping later */}
-                      <Sparkles className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-semibold">{category.name_en}</h3>
-                  </Link>
-                ))
-              : Array.from({ length: 8 }).map((_, i) => (
+          {categories && categories.length > 0 ? (
+            <CategoryGrid categories={categories as any} />
+          ) : (
+            <>
+              <div className="text-center mb-12">
+                <div className="h-8 w-48 bg-muted rounded mx-auto mb-4 animate-pulse" />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
                     className="p-6 rounded-xl border bg-card flex flex-col items-center animate-pulse"
                   >
-                    <div className="h-12 w-12 rounded-full bg-muted mb-4"></div>
-                    <div className="h-5 w-24 bg-muted rounded"></div>
+                    <div className="h-12 w-12 rounded-full bg-muted mb-4" />
+                    <div className="h-5 w-24 bg-muted rounded" />
                   </div>
                 ))}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>
