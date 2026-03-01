@@ -42,6 +42,12 @@ export async function Navbar() {
               Categories
             </Link>
             <Link
+              href="/tools"
+              className="hover:text-foreground transition-colors"
+            >
+              Mini Tools
+            </Link>
+            <Link
               href="/new"
               className="hover:text-foreground transition-colors"
             >

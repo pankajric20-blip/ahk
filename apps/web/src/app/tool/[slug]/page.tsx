@@ -178,7 +178,12 @@ export default async function ToolDetailsPage({ params }: Props) {
           </div>
 
           {/* Hindi Tutorial Video */}
-          <YoutubeTutorialWidget url={tool.demo_video_url} />
+          <YoutubeTutorialWidget
+            url={
+              tool.demo_video_url ||
+              `https://www.youtube.com/results?search_query=${encodeURIComponent(tool.name_en + " hindi tutorial")}`
+            }
+          />
 
           {/* Detailed Description */}
           {tool.description_en && (
