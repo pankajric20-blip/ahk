@@ -14,6 +14,7 @@ import { ToolLogo } from "@/components/tool/tool-logo";
 import { RatingForm } from "@/components/tool/rating-form";
 import { ReviewList } from "@/components/tool/review-list";
 import { Star } from "lucide-react";
+import { YoutubeTutorialWidget } from "@/components/tool/youtube-tutorial-widget";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -116,18 +117,6 @@ export default async function ToolDetailsPage({ params }: Props) {
     currentUserReview = reviews.find((r: any) => r.user_id === user.id) || null;
   }
 
-  // Helper to extract YouTube ID for generic embeds if full URL is given
-  const getYoutubeId = (url: string) => {
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
-  };
-
-  const videoId = tool.youtube_hindi_url
-    ? getYoutubeId(tool.youtube_hindi_url)
-    : null;
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <Link
@@ -185,26 +174,7 @@ export default async function ToolDetailsPage({ params }: Props) {
           </div>
 
           {/* Hindi Tutorial Video */}
-          {videoId && (
-            <div className="rounded-xl overflow-hidden border bg-card shadow-sm">
-              <div className="bg-muted p-4 border-b flex items-center gap-2">
-                <PlayCircle className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Hindi Tutorial</h3>
-              </div>
-              <div className="aspect-video w-full bg-black">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </div>
-          )}
+          <YoutubeTutorialWidget url={tool.youtube_hindi_url} />
 
           {/* Detailed Description */}
           {tool.detailed_description_en && (
