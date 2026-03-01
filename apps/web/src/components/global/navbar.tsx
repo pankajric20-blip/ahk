@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Globe, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { SearchInput } from "./search-input";
 import { Suspense } from "react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
+import { LanguageSwitcher } from "./language-switcher";
 
 export async function Navbar() {
   const cookieStore = await cookies();
@@ -67,10 +68,7 @@ export async function Navbar() {
             </Suspense>
           </div>
 
-          <button className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-foreground text-muted-foreground transition-colors">
-            <Globe className="h-4 w-4" />
-            <span>EN</span>
-          </button>
+          <LanguageSwitcher />
 
           {user ? (
             <Link
