@@ -69,10 +69,12 @@ function AuthForm() {
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -175,7 +177,7 @@ function AuthForm() {
         }}
         theme="dark" // We default to dark mode in layout.tsx
         providers={[]} // We handle Google explicitly above
-        redirectTo={`${typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`}
+        redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`}
       />
     </div>
   );
