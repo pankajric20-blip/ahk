@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/global/navbar";
 import { Footer } from "@/components/global/footer";
 import { Toaster } from "sonner";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,9 +30,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <LanguageProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </LanguageProvider>
+
         <Toaster theme="dark" richColors position="top-center" />
       </body>
     </html>

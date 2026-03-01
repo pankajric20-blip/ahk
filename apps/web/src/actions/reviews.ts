@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 export async function submitReview(formData: FormData) {
-  const toolId = Number(formData.get("tool_id"));
+  const toolId = formData.get("tool_id") as string;
   const rating = Number(formData.get("rating"));
   const reviewText = formData.get("review_text") as string;
   const slug = formData.get("slug") as string;
@@ -29,8 +29,7 @@ export async function submitReview(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
-  // Upsert the review (handles both insert and update if uniqueness is enforced on user_id, tool_id)
-  // Our schema has UNIQUE(user_id, tool_id)
+  // Upsert the review
   const { error: upsertError } = await (supabase.from("reviews") as any).upsert(
     {
       user_id: user.id,
@@ -65,10 +64,10 @@ export async function submitReview(formData: FormData) {
         totalReviews
       : 0;
 
-  // Update the tools table with the new aggregate values
-  const { error: updateToolError } = await (supabase.from("tools") as any)
+  // Update the ai_tools table with the new aggregate values
+  const { error: updateToolError } = await (supabase.from("ai_tools") as any)
     .update({
-      rating: Number(averageRating.toFixed(1)),
+      rating_avg: Number(averageRating.toFixed(1)),
       review_count: totalReviews,
     })
     .eq("id", toolId);
@@ -78,10 +77,10 @@ export async function submitReview(formData: FormData) {
     return { error: "Failed to update tool rating" };
   }
 
-  // Revalidate the tool page
+  // Revalidate paths
   revalidatePath(`/tool/${slug}`);
   revalidatePath("/");
-  revalidatePath(`/categories/${slug}`); // Not exact but close enough, maybe better to just use router.refresh() on client or revalidate tag
+  revalidatePath(`/categories/${slug}`);
 
   return { success: true };
 }

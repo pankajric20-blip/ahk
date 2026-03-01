@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
-import { ToolLogo } from "@/components/tool/tool-logo";
+import { ToolCard } from "@/components/tool/tool-card";
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -14,30 +13,31 @@ export default async function Home() {
   );
 
   // Fetch featured/sponsored tools — fall back to top-rated published tools
-  // if none are explicitly marked as featured in the DB yet.
   let { data: featuredTools } = await supabase
-    .from("tools")
+    .from("ai_tools")
     .select("*")
-    .eq("status", "published")
+    .eq("status", "approved")
     .or("is_featured.eq.true,is_sponsored.eq.true")
-    .order("rating", { ascending: false })
+    .order("rating_avg", { ascending: false })
     .limit(6);
 
-  // Fallback: if no featured/sponsored tools, show highest-rated published tools
+  // Fallback: if no featured/sponsored tools, show highest-rated approved tools
   if (!featuredTools || featuredTools.length === 0) {
     const { data: topTools } = await supabase
-      .from("tools")
+      .from("ai_tools")
       .select("*")
-      .eq("status", "published")
-      .order("rating", { ascending: false })
+      .eq("status", "approved")
+      .order("rating_avg", { ascending: false })
       .limit(6);
     featuredTools = topTools;
   }
 
-  // Fetch popular categories
+  // Fetch popular task categories
   const { data: categories } = await supabase
-    .from("categories")
+    .from("task_categories")
     .select("*")
+    .eq("level", 0)
+    .order("display_order", { ascending: true })
     .limit(8);
 
   return (
@@ -108,52 +108,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredTools && featuredTools.length > 0
               ? featuredTools.map((tool: any) => (
-                  <div
-                    key={tool.id}
-                    className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden"
-                  >
-                    <div className="flex flex-col p-6 h-full">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
-                          <ToolLogo
-                            logoUrl={tool.logo_url}
-                            name={tool.name}
-                            size="lg"
-                          />
-                        </div>
-                        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
-                          {tool.pricing_model}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                        <Link
-                          href={`/tool/${tool.slug}`}
-                          className="before:absolute before:inset-0"
-                        >
-                          {tool.name}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
-                        {tool.description_en}
-                      </p>
-                      {tool.description_hi && (
-                        <p className="text-sm text-muted-foreground/80 font-hindi line-clamp-1 mb-4 italic">
-                          &quot;{tool.description_hi}&quot;
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
-                        <div className="flex items-center text-amber-500">
-                          <span className="text-sm font-medium mr-1">
-                            {tool.rating || "New"}
-                          </span>
-                          ★
-                        </div>
-                        <span className="text-sm font-medium text-primary flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">
-                          Details <ArrowRight className="ml-1 h-3 w-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <ToolCard key={tool.id} tool={tool} />
                 ))
               : // Empty state skeletons
                 Array.from({ length: 6 }).map((_, i) => (
@@ -209,7 +164,7 @@ export default async function Home() {
                       {/* Replace with actual Lucide icon mapping later */}
                       <Sparkles className="h-6 w-6" />
                     </div>
-                    <h3 className="font-semibold">{category.name}</h3>
+                    <h3 className="font-semibold">{category.name_en}</h3>
                   </Link>
                 ))
               : Array.from({ length: 8 }).map((_, i) => (

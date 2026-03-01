@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { ToolLogo } from "@/components/tool/tool-logo";
+import { ToolCard } from "@/components/tool/tool-card";
 import { BackButton } from "@/components/global/back-button";
+import Link from "next/link";
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -35,22 +34,23 @@ export default async function SearchPage({ searchParams }: Props) {
   let searchResults: any[] = [];
 
   if (q) {
-    // Sanitize: strip PostgREST operator characters that could alter the .or() filter string.
-    // Supabase parameterises values in .ilike(), but .or() uses string interpolation.
+    // Sanitize
     const safeQ = q
       .trim()
       .slice(0, 200) // cap length to prevent abuse
-      .replace(/[%*():,]/g, ""); // strip PostgREST / SQL wildcards
+      .replace(/[%*():,'&|!]/g, " "); // Strip FTS special characters to avoid syntax errors
 
     if (safeQ) {
+      // Use pg_trgm websearch instead of simple ilike for better hinglish results
       const { data } = await supabase
-        .from("tools")
+        .from("ai_tools")
         .select("*")
-        .eq("status", "published")
-        .or(
-          `name.ilike.%${safeQ}%,description_en.ilike.%${safeQ}%,description_hi.ilike.%${safeQ}%`,
-        )
-        .order("rating", { ascending: false });
+        .eq("status", "approved")
+        .textSearch("search_vector", safeQ, {
+          type: "websearch",
+          config: "english",
+        })
+        .order("rating_avg", { ascending: false });
 
       if (data) searchResults = data;
     }
@@ -80,47 +80,7 @@ export default async function SearchPage({ searchParams }: Props) {
       ) : searchResults.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {searchResults.map((tool: any) => (
-            <div
-              key={tool.id}
-              className="group flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden h-full"
-            >
-              <div className="p-6 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-                    <ToolLogo
-                      logoUrl={tool.logo_url}
-                      name={tool.name}
-                      size="md"
-                    />
-                  </div>
-                  <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] uppercase font-bold bg-secondary text-secondary-foreground">
-                    {tool.pricing_model}
-                  </span>
-                </div>
-
-                <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-colors">
-                  <Link
-                    href={`/tool/${tool.slug}`}
-                    className="before:absolute before:inset-0"
-                  >
-                    {tool.name}
-                  </Link>
-                </h3>
-
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
-                  {tool.description_en}
-                </p>
-
-                <div className="mt-auto pt-3 border-t flex justify-between items-center w-full">
-                  <div className="flex items-center text-amber-500 text-xs font-semibold">
-                    {tool.rating || "New"} ★
-                  </div>
-                  <span className="text-xs font-medium text-primary flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">
-                    View <ArrowRight className="ml-1 h-3 w-3" />
-                  </span>
-                </div>
-              </div>
-            </div>
+            <ToolCard key={tool.id} tool={tool} />
           ))}
         </div>
       ) : (

@@ -19,9 +19,9 @@ export default async function CategoriesPage() {
   );
 
   const { data: categories } = await supabase
-    .from("categories")
+    .from("task_categories")
     .select("*")
-    .order("name");
+    .order("name_en");
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -47,10 +47,10 @@ export default async function CategoriesPage() {
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                     <Sparkles className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold text-lg">{category.name}</h3>
+                  <h3 className="font-semibold text-lg">{category.name_en}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mt-auto line-clamp-2">
-                  Discover {category.name} tools for your creative and
+                  Discover {category.name_en} tools for your creative and
                   professional workflows.
                 </p>
                 <div className="mt-4 flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">

@@ -3,12 +3,7 @@ import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  ExternalLink,
-  PlayCircle,
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink } from "lucide-react";
 import { BookmarkButton } from "@/components/tool/bookmark-button";
 import { ToolLogo } from "@/components/tool/tool-logo";
 import { RatingForm } from "@/components/tool/rating-form";
@@ -30,8 +25,8 @@ export async function generateMetadata({ params }: Props) {
   );
 
   const { data } = await supabase
-    .from("tools")
-    .select("name, description_en")
+    .from("ai_tools")
+    .select("name_en, description_en")
     .eq("slug", p.slug)
     .single();
   const tool: any = data;
@@ -39,7 +34,7 @@ export async function generateMetadata({ params }: Props) {
   if (!tool) return { title: "Tool Not Found - Aihkya" };
 
   return {
-    title: `${tool.name} - AI Tool Details | Aihkya`,
+    title: `${tool.name_en} - AI Tool Details | Aihkya`,
     description: tool.description_en,
   };
 }
@@ -53,29 +48,30 @@ export default async function ToolDetailsPage({ params }: Props) {
     cookieStore,
   );
 
-  // Fetch tool data with category info
+  // Fetch tool data
   const { data: dbTool } = await supabase
-    .from("tools")
+    .from("ai_tools")
     .select("*")
     .eq("slug", p.slug)
     .single();
-
-  const anyTool: any = dbTool;
-  let toolCategory: any = null;
-
-  if (anyTool && anyTool.category) {
-    const { data: catData } = await supabase
-      .from("categories")
-      .select("name, slug")
-      .eq("name", anyTool.category)
-      .single();
-    toolCategory = catData;
-  }
 
   const tool: any = dbTool;
 
   if (!tool) {
     notFound();
+  }
+
+  let toolCategory: any = null;
+  // Fetch first category for the tool if exists
+  const { data: catMapping } = await supabase
+    .from("tool_tasks")
+    .select("task_categories(name_en, slug)")
+    .eq("tool_id", tool.id)
+    .limit(1)
+    .single();
+
+  if (catMapping && (catMapping as any).task_categories) {
+    toolCategory = (catMapping as any).task_categories;
   }
 
   // Check if user has bookmarked this tool
@@ -86,8 +82,8 @@ export default async function ToolDetailsPage({ params }: Props) {
 
   if (user) {
     const { data: bookmark } = await supabase
-      .from("bookmarks")
-      .select("id")
+      .from("saved_tools")
+      .select("tool_id")
       .eq("user_id", user.id)
       .eq("tool_id", tool.id)
       .single();
@@ -104,7 +100,7 @@ export default async function ToolDetailsPage({ params }: Props) {
       review_text,
       created_at,
       user_id,
-      user:users(name, avatar_url)
+      user:profiles(display_name, avatar_url)
     `,
     )
     .eq("tool_id", tool.id)
@@ -133,12 +129,12 @@ export default async function ToolDetailsPage({ params }: Props) {
           {/* Header */}
           <div className="flex items-start gap-6">
             <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center border shrink-0 overflow-hidden">
-              <ToolLogo logoUrl={tool.logo_url} name={tool.name} size="lg" />
+              <ToolLogo logoUrl={tool.logo_url} name={tool.name_en} size="lg" />
             </div>
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{tool.name}</h1>
-                {tool.status === "published" && (
+                <h1 className="text-3xl font-bold">{tool.name_en}</h1>
+                {tool.status === "approved" && (
                   <CheckCircle2 className="h-5 w-5 text-blue-500" />
                 )}
               </div>
@@ -146,7 +142,7 @@ export default async function ToolDetailsPage({ params }: Props) {
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center text-amber-500 font-semibold gap-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 text-sm">
                   <Star className="h-4 w-4 fill-amber-500" />
-                  {tool.rating || "New"}
+                  {tool.rating_avg > 0 ? tool.rating_avg.toFixed(1) : "New"}
                 </div>
                 {tool.review_count > 0 && (
                   <span className="text-sm text-muted-foreground">
@@ -167,21 +163,26 @@ export default async function ToolDetailsPage({ params }: Props) {
                   href={`/categories/${toolCategory.slug}`}
                   className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-accent text-accent-foreground hover:bg-accent/80"
                 >
-                  {toolCategory.name}
+                  {toolCategory.name_en}
                 </Link>
+              )}
+              {tool.made_in_india && (
+                <span className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-orange-100 text-orange-800 ml-2">
+                  🇮🇳 Made in India
+                </span>
               )}
             </div>
           </div>
 
           {/* Hindi Tutorial Video */}
-          <YoutubeTutorialWidget url={tool.youtube_hindi_url} />
+          <YoutubeTutorialWidget url={tool.demo_video_url} />
 
           {/* Detailed Description */}
-          {tool.detailed_description_en && (
+          {tool.description_en && (
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              <h3 className="text-xl font-bold mb-4">About {tool.name}</h3>
+              <h3 className="text-xl font-bold mb-4">About {tool.name_en}</h3>
               <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {tool.detailed_description_en}
+                {tool.description_en}
               </div>
             </div>
           )}
@@ -247,7 +248,6 @@ export default async function ToolDetailsPage({ params }: Props) {
             <div className="flex flex-col gap-3 mt-6">
               {tool.website_url &&
                 (() => {
-                  // Only allow http/https URLs to prevent javascript: XSS
                   let isValidUrl = false;
                   try {
                     const parsed = new URL(tool.website_url);
@@ -277,15 +277,6 @@ export default async function ToolDetailsPage({ params }: Props) {
               />
             </div>
           </div>
-
-          {tool.best_for_india && (
-            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 text-sm">
-              <h4 className="font-semibold text-primary mb-2 flex items-center">
-                🇮🇳 Why it&apos;s good for India
-              </h4>
-              <p className="text-muted-foreground">{tool.best_for_india}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

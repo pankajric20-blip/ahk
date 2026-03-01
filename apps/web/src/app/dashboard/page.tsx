@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { LogOut, Bookmark, Star, Settings, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { ToolLogo } from "@/components/tool/tool-logo";
+import { ToolCard } from "@/components/tool/tool-card";
 
 export const metadata = {
   title: "Dashboard | Aihkya",
@@ -26,40 +26,41 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch user profile from profiles table, or just use auth user data
-  const { data: profileData } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
-  const profile: any = profileData;
 
-  // Step 1: Get the IDs of tools the user has bookmarked
+  // Get the IDs of tools the user has bookmarked
   const { data: bookmarkRows, error: bookmarkError } = await supabase
-    .from("bookmarks")
+    .from("saved_tools")
     .select("tool_id, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (bookmarkError) {
-    console.error("[Dashboard] bookmarks fetch error:", bookmarkError.message);
+    console.error(
+      "[Dashboard] saved_tools fetch error:",
+      bookmarkError.message,
+    );
   }
 
-  // Step 2: Fetch the actual tool records for those IDs
+  // Fetch the actual ai_tools records for those IDs
   let savedTools: any[] = [];
   if (bookmarkRows && bookmarkRows.length > 0) {
     const toolIds = bookmarkRows.map((b: any) => b.tool_id);
     const { data: toolData, error: toolError } = await supabase
-      .from("tools")
-      .select("id, name, slug, description_en, logo_url, pricing_model, rating")
+      .from("ai_tools")
+      .select("*")
       .in("id", toolIds);
 
     if (toolError) {
-      console.error("[Dashboard] tools fetch error:", toolError.message);
+      console.error("[Dashboard] ai_tools fetch error:", toolError.message);
     } else if (toolData) {
-      // Preserve the bookmark order (most recently bookmarked first)
-      const toolMap = new Map(toolData.map((t: any) => [t.id, t]));
-      savedTools = toolIds.map((id: number) => toolMap.get(id)).filter(Boolean);
+      // Preserve the bookmark order
+      const toolMap = new Map((toolData as any[]).map((t) => [t.id, t]));
+      savedTools = toolIds.map((id: string) => toolMap.get(id)).filter(Boolean);
     }
   }
 
@@ -71,7 +72,7 @@ export default async function DashboardPage() {
             My Dashboard
           </h1>
           <p className="text-muted-foreground text-sm">
-            Welcome back, {profile?.full_name || user.email}
+            Welcome back, {(profile as any)?.display_name || user.email}
           </p>
         </div>
 
@@ -122,47 +123,7 @@ export default async function DashboardPage() {
           {savedTools.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {savedTools.map((tool: any) => (
-                <div
-                  key={tool.id}
-                  className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all h-full"
-                >
-                  <div className="p-5 flex flex-col h-full">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-                        <ToolLogo
-                          logoUrl={tool.logo_url}
-                          name={tool.name}
-                          size="md"
-                        />
-                      </div>
-                      <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] uppercase font-bold bg-secondary text-secondary-foreground">
-                        {tool.pricing_model}
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-colors">
-                      <Link
-                        href={`/tool/${tool.slug}`}
-                        className="after:absolute after:inset-0"
-                      >
-                        {tool.name}
-                      </Link>
-                    </h3>
-
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
-                      {tool.description_en}
-                    </p>
-
-                    <div className="mt-auto pt-3 border-t flex justify-between items-center w-full">
-                      <div className="flex items-center text-amber-500 text-xs font-semibold">
-                        {tool.rating || "New"} ★
-                      </div>
-                      <span className="text-xs font-medium text-primary flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">
-                        View <ArrowRight className="ml-1 h-3 w-3" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <ToolCard key={tool.id} tool={tool} />
               ))}
             </div>
           ) : (

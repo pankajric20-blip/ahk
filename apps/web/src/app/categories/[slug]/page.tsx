@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Filter } from "lucide-react";
-import { ToolLogo } from "@/components/tool/tool-logo";
+import { ToolCard } from "@/components/tool/tool-card";
 import { BackButton } from "@/components/global/back-button";
 import { PricingFilter } from "./pricing-filter";
 import { Suspense } from "react";
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props) {
   );
 
   const { data } = await supabase
-    .from("categories")
-    .select("name")
+    .from("task_categories")
+    .select("name_en")
     .eq("slug", p.slug)
     .single();
   const category: any = data;
@@ -33,8 +33,8 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return { title: "Category Not Found - Aihkya" };
 
   return {
-    title: `${category.name} AI Tools | Aihkya`,
-    description: `Discover the best AI tools for ${category.name}.`,
+    title: `${category.name_en} AI Tools | Aihkya`,
+    description: `Discover the best AI tools for ${category.name_en}.`,
   };
 }
 
@@ -54,7 +54,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   // Fetch category
   const { data } = await supabase
-    .from("categories")
+    .from("task_categories")
     .select("*")
     .eq("slug", p.slug)
     .single();
@@ -64,22 +64,25 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Fetch tools in category
-  // Note: tools.category is a text column (e.g. 'Content Creation'), not a FK
+  // Fetch tools in category via intersection table
   let query = supabase
-    .from("tools")
-    .select("*")
-    .eq("category", category.name)
-    .eq("status", "published")
+    .from("ai_tools")
+    .select("*, tool_tasks!inner(task_id)")
+    .eq("tool_tasks.task_id", category.id)
+    .eq("status", "approved")
     .order("is_sponsored", { ascending: false })
-    .order("rating", { ascending: false });
+    .order("rating_avg", { ascending: false });
 
   // Apply pricing filter if any are selected
   if (activePricing.length > 0) {
-    query = query.in("pricing_model", activePricing);
+    // Note: ensure activePricing maps properly if UI casing differs from DB ENUM
+    // DB enum: 'free', 'freemium', 'free_trial', 'paid', 'contact_sales'
+    const lowerPricing = activePricing.map((p) => p.toLowerCase());
+    query = query.in("pricing_model", lowerPricing);
   }
 
-  const { data: categoryTools } = await query;
+  const { data: categoryTools, error } = await query;
+  if (error) console.error(error);
   const tools = categoryTools ?? [];
 
   return (
@@ -91,12 +94,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
       <div className="mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">
-          {category.name} Tools
+          {category.name_en} Tools
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Browse our curated collection of{" "}
           <span className="text-foreground font-medium">{tools.length}</span> AI
-          platforms specifically targeted for {category.name.toLowerCase()}{" "}
+          platforms specifically targeted for {category.name_en.toLowerCase()}{" "}
           workflows.
           {activePricing.length > 0 && (
             <span className="ml-1 text-sm text-primary">
@@ -131,49 +134,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {/* Tools Grid */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.length > 0 ? (
-            tools.map((tool: any) => (
-              <div
-                key={tool.id}
-                className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden h-full"
-              >
-                <div className="p-6 flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-                      <ToolLogo
-                        logoUrl={tool.logo_url}
-                        name={tool.name}
-                        size="md"
-                      />
-                    </div>
-                    <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] uppercase font-bold bg-secondary text-secondary-foreground">
-                      {tool.pricing_model}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-colors">
-                    <Link
-                      href={`/tool/${tool.slug}`}
-                      className="before:absolute before:inset-0"
-                    >
-                      {tool.name}
-                    </Link>
-                  </h3>
-
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">
-                    {tool.description_en}
-                  </p>
-
-                  <div className="mt-auto pt-3 border-t flex justify-between items-center w-full">
-                    <div className="flex items-center text-amber-500 text-xs font-semibold">
-                      {tool.rating || "New"} ★
-                    </div>
-                    <span className="text-xs font-medium text-primary flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">
-                      View <ArrowRight className="ml-1 h-3 w-3" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))
+            tools.map((tool: any) => <ToolCard key={tool.id} tool={tool} />)
           ) : (
             <div className="col-span-full py-12 text-center border rounded-xl border-dashed bg-muted/20">
               <p className="text-muted-foreground text-lg">
