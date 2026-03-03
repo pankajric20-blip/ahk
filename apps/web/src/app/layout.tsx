@@ -5,6 +5,8 @@ import { Navbar } from "@/components/global/navbar";
 import { Footer } from "@/components/global/footer";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ToasterWrapper } from "@/components/global/toaster-wrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,17 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
-        <LanguageProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </LanguageProvider>
-
-        <Toaster theme="dark" richColors position="top-center" />
+        <ThemeProvider>
+          <LanguageProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </LanguageProvider>
+          <ToasterWrapper />
+        </ThemeProvider>
       </body>
     </html>
   );

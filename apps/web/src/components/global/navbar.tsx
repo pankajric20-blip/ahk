@@ -7,6 +7,7 @@ import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { LanguageSwitcher } from "./language-switcher";
 import { NavLinks, NavAuthButton } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
 
 export async function Navbar() {
   const cookieStore = await cookies();
@@ -51,6 +52,7 @@ export async function Navbar() {
           </div>
 
           <LanguageSwitcher />
+          <ThemeToggle />
 
           <NavAuthButton isLoggedIn={!!user} />
 
