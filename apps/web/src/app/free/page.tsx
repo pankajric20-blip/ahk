@@ -31,7 +31,7 @@ export default async function FreeToolsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl min-h-[60vh]">
       <div className="mb-8">
-        <BackButton fallbackHref="/" label="Back to Home" />
+        <BackButton fallbackHref="/" translationKey="common_back" />
       </div>
 
       <div className="mb-10">

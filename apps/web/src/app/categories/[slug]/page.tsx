@@ -81,7 +81,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-8">
-        <BackButton fallbackHref="/categories" label="All Categories" />
+        <BackButton fallbackHref="/categories" translationKey="cat_back" />
       </div>
 
       <CategoryPageContent

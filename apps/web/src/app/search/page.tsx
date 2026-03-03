@@ -55,7 +55,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl min-h-[60vh]">
       <div className="mb-4">
-        <BackButton fallbackHref="/" label="Back to Home" />
+        <BackButton fallbackHref="/" translationKey="common_back" />
       </div>
 
       <SearchPageHeader q={q} resultCount={searchResults.length} />

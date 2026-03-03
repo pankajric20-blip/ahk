@@ -22,7 +22,7 @@ const translations = {
   // ── Homepage ─────────────────────────────────────────────
   home_badge: {
     en: "India's First Hindi-First AI Directory",
-    hi: "भारत की पहली हिंदी-पहली AI डायरेक्टरी",
+    hi: "भारत की पहली हिंदी-प्रथम AI टूल डायरेक्टरी",
     hinglish: "India ka pehla Hindi-First AI Directory",
   },
   home_hero_title: {
