@@ -47,7 +47,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     enText: string | null | undefined,
     hiText: string | null | undefined,
   ): string => {
-    if (language === "hi" || language === "hinglish") {
+    if (language === "hi") {
       return hiText || enText || "";
     }
     return enText || hiText || "";
