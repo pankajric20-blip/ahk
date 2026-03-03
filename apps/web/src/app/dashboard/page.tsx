@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
