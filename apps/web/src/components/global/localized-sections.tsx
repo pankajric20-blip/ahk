@@ -1,6 +1,17 @@
 "use client";
 
+import { Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+export function HomeBadge() {
+  const { ui } = useLanguage();
+  return (
+    <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <Sparkles className="mr-2 h-4 w-4" />
+      <span>{ui("home_badge")}</span>
+    </div>
+  );
+}
 
 export function FeaturedSectionHeader() {
   const { ui } = useLanguage();

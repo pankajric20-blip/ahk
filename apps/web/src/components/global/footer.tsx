@@ -1,27 +1,30 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
+  const { ui } = useLanguage();
+
   return (
     <footer className="border-t py-12 bg-muted/20">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
           <h3 className="font-bold text-lg text-primary">AihKya</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            India&apos;s first Hindi-first AI tools discovery platform.
-            Empowering everyone to leverage the power of Artificial
-            Intelligence.
+            {ui("footer_tagline")}
           </p>
         </div>
 
         <div className="space-y-4">
-          <h4 className="font-semibold">Discover</h4>
+          <h4 className="font-semibold">{ui("nav_categories")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
               <Link
                 href="/categories"
                 className="hover:text-foreground transition-colors"
               >
-                All Categories
+                {ui("cats_title")}
               </Link>
             </li>
             <li>
@@ -29,7 +32,7 @@ export function Footer() {
                 href="/free"
                 className="hover:text-foreground transition-colors"
               >
-                Free Tools
+                {ui("common_bilkul_free")}
               </Link>
             </li>
             <li>
@@ -44,14 +47,14 @@ export function Footer() {
         </div>
 
         <div className="space-y-4">
-          <h4 className="font-semibold">For Creators</h4>
+          <h4 className="font-semibold">{ui("new_title")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
               <Link
                 href="/new"
                 className="hover:text-foreground transition-colors"
               >
-                Submit a Tool
+                {ui("nav_submit_tool")}
               </Link>
             </li>
             <li>

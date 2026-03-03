@@ -8,6 +8,7 @@ import {
   HeroSection,
   FeaturedSectionHeader,
   HomeSearchBar,
+  HomeBadge,
 } from "@/components/global/localized-sections";
 
 export default async function Home() {
@@ -52,13 +53,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-background pt-24 pb-32">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <Sparkles className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">
-              India&apos;s First Hindi-First AI Directory
-            </span>
-            <span className="sm:hidden">Hindi-First AI Directory</span>
-          </div>
+          <HomeBadge />
           <HeroSection />
 
           <HomeSearchBar />
