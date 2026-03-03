@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/global/navbar";
 import { Footer } from "@/components/global/footer";
-import { Toaster } from "sonner";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToasterWrapper } from "@/components/global/toaster-wrapper";
