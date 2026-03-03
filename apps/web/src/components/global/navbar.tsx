@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { LanguageSwitcher } from "./language-switcher";
+import { NavLinks, NavAuthButton } from "./nav-links";
 
 export async function Navbar() {
   const cookieStore = await cookies();
@@ -35,26 +36,7 @@ export async function Navbar() {
               Aih<span className="text-primary">Kya</span>
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <Link
-              href="/categories"
-              className="hover:text-foreground transition-colors"
-            >
-              Categories
-            </Link>
-            <Link
-              href="/tools"
-              className="hover:text-foreground transition-colors"
-            >
-              Mini Tools
-            </Link>
-            <Link
-              href="/new"
-              className="hover:text-foreground transition-colors"
-            >
-              Submit Tool
-            </Link>
-          </nav>
+          <NavLinks />
         </div>
 
         <div className="flex items-center space-x-4">
@@ -70,21 +52,7 @@ export async function Navbar() {
 
           <LanguageSwitcher />
 
-          {user ? (
-            <Link
-              href="/dashboard"
-              className="hidden md:flex items-center justify-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="hidden md:flex items-center justify-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Login
-            </Link>
-          )}
+          <NavAuthButton isLoggedIn={!!user} />
 
           <button className="md:hidden flex items-center justify-center h-9 w-9 rounded-md border border-input">
             <Menu className="h-4 w-4" />

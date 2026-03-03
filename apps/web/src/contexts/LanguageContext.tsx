@@ -7,17 +7,20 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { translate, type TranslationKey } from "@/i18n/translations";
 
 type LanguageType = "hi" | "en" | "hinglish";
 
 interface LanguageContextProps {
   language: LanguageType;
   setLanguage: (lang: LanguageType) => void;
-  // A helper to pick a string based on the language preference
+  // Pick db content string based on language preference
   t: (
     enText: string | null | undefined,
     hiText: string | null | undefined,
   ) => string;
+  // Pick UI string from central translations dictionary
+  ui: (key: TranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(
@@ -25,9 +28,8 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(
 );
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<LanguageType>("hi"); // Default Hindi-first
+  const [language, setLanguage] = useState<LanguageType>("hi");
 
-  // Optional: load user preference from local storage or profile on mount
   useEffect(() => {
     const saved = localStorage.getItem("user_language");
     if (saved === "en" || saved === "hi" || saved === "hinglish") {
@@ -40,21 +42,25 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("user_language", lang);
   };
 
+  // For database bilingual content (name_en / name_hi)
   const t = (
     enText: string | null | undefined,
     hiText: string | null | undefined,
   ): string => {
     if (language === "hi" || language === "hinglish") {
-      // If Hindi/Hinglish is preferred, return Hindi text if available, fallback to English
       return hiText || enText || "";
     }
-    // For English
     return enText || hiText || "";
+  };
+
+  // For UI strings from the central translation dictionary
+  const ui = (key: TranslationKey): string => {
+    return translate(key, language);
   };
 
   return (
     <LanguageContext.Provider
-      value={{ language, setLanguage: handleSetLanguage, t }}
+      value={{ language, setLanguage: handleSetLanguage, t, ui }}
     >
       {children}
     </LanguageContext.Provider>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";
@@ -7,6 +7,7 @@ import { CategoryGrid } from "@/components/global/category-grid";
 import {
   HeroSection,
   FeaturedSectionHeader,
+  HomeSearchBar,
 } from "@/components/global/localized-sections";
 
 export default async function Home() {
@@ -60,26 +61,7 @@ export default async function Home() {
           </div>
           <HeroSection />
 
-          <div className="w-full max-w-2xl relative flex items-center animate-in fade-in slide-in-from-bottom-7 duration-1000 delay-500">
-            <form
-              action="/search"
-              className="w-full relative flex items-center"
-            >
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input
-                type="text"
-                name="q"
-                placeholder="Search for AI writing, video generation, chatbots..."
-                className="w-full h-14 pl-12 pr-4 rounded-full border-2 border-input bg-background/50 backdrop-blur-sm text-lg shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground h-10 px-6 rounded-full font-medium hover:bg-primary/90 transition-colors"
-              >
-                Search
-              </button>
-            </form>
-          </div>
+          <HomeSearchBar />
         </div>
       </section>
 

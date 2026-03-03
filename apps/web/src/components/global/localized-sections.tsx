@@ -3,71 +3,62 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function FeaturedSectionHeader() {
-  const { language } = useLanguage();
-
+  const { ui } = useLanguage();
   return (
     <div>
       <h2 className="text-3xl font-bold tracking-tight mb-2">
-        {language === "hi"
-          ? "चुनिंदा AI टूल्स"
-          : language === "hinglish"
-            ? "Featured AI Tools"
-            : "Featured Tools"}
+        {ui("home_featured_title")}
       </h2>
-      <p className="text-muted-foreground">
-        {language === "hi"
-          ? "अधिकतम उत्पादकता के लिए हाथ से चुने गए AI टूल्स।"
-          : language === "hinglish"
-            ? "Maximum productivity ke liye hand-picked AI tools."
-            : "Hand-picked AI tools for maximum productivity."}
-      </p>
+      <p className="text-muted-foreground">{ui("home_featured_subtitle")}</p>
     </div>
   );
 }
 
 export function HeroSection() {
-  const { language } = useLanguage();
-
-  if (language === "hi") {
-    return (
-      <>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-150">
-          अपने काम के लिए सबसे{" "}
-          <span className="text-primary">अच्छे AI टूल</span> खोजें
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-          पूरी हिंदी भाषा के समर्थन, विस्तृत मूल्य निर्धारण और भारतीय विकल्पों
-          के साथ सावधानीपूर्वक चुने गए AI टूल्स खोजें।
-        </p>
-      </>
-    );
-  }
-
-  if (language === "hinglish") {
-    return (
-      <>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-150">
-          Apne workflow ke liye best{" "}
-          <span className="text-primary">AI Tools</span> dhundho
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-          Hindi support ke saath carefully curated AI tools, detailed pricing,
-          aur Indian alternatives ke recommendations.
-        </p>
-      </>
-    );
-  }
-
+  const { ui } = useLanguage();
   return (
     <>
       <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-150">
-        Discover the Best <span className="text-primary">AI Tools</span> for
-        Your Workflow
+        {ui("home_hero_title")}
       </h1>
       <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300">
-        Explore carefully curated AI tools with full Hindi language support,
-        detailed pricing, and Indian alternative recommendations.
+        {ui("home_hero_subtitle")}
       </p>
     </>
+  );
+}
+
+export function HomeSearchBar() {
+  const { ui } = useLanguage();
+  return (
+    <div className="w-full max-w-2xl relative flex items-center animate-in fade-in slide-in-from-bottom-7 duration-1000 delay-500">
+      <form action="/search" className="w-full relative flex items-center">
+        <svg
+          className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          name="q"
+          placeholder={ui("home_search_placeholder")}
+          className="w-full h-14 pl-12 pr-4 rounded-full border-2 border-input bg-background/50 backdrop-blur-sm text-lg shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
+        />
+        <button
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground h-10 px-6 rounded-full font-medium hover:bg-primary/90 transition-colors"
+        >
+          {ui("home_search_btn")}
+        </button>
+      </form>
+    </div>
   );
 }
