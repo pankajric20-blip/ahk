@@ -230,6 +230,67 @@ const translations = {
     hi: "AIHKYA समुदाय के साथ एक AI टूल शेयर करें।",
     hinglish: "AIHKYA community ke saath AI tool share karo.",
   },
+  new_tool_name_label: {
+    en: "Tool Name",
+    hi: "टूल का नाम",
+    hinglish: "Tool ka naam",
+  },
+  new_tool_name_placeholder: {
+    en: "e.g., ChatGPT, Midjourney",
+    hi: "उदाहरण: चैटजीपीटी, मिडजर्नी",
+    hinglish: "Jaise: ChatGPT, Midjourney",
+  },
+  new_tool_desc_label: {
+    en: "Short Description",
+    hi: "संक्षिप्त विवरण",
+    hinglish: "Chhota description",
+  },
+  new_tool_desc_placeholder: {
+    en: "A brief summary of what the tool does.",
+    hi: "टूल क्या करता है, इसका संक्षिप्त सारांश।",
+    hinglish: "Tool kya karta hai, uska chhota sa summary.",
+  },
+  new_tool_url_label: {
+    en: "Tool Website URL",
+    hi: "टूल की वेबसाइट का यूआरएल",
+    hinglish: "Tool ki website ka URL",
+  },
+  new_tool_url_placeholder: {
+    en: "https://example.com",
+    hi: "https://उदाहरण.कॉम",
+    hinglish: "https://example.com",
+  },
+  new_tool_category_label: {
+    en: "Category",
+    hi: "श्रेणी",
+    hinglish: "Category",
+  },
+  new_tool_category_placeholder: {
+    en: "Select a category",
+    hi: "एक श्रेणी चुनें",
+    hinglish: "Ek category chuno",
+  },
+  new_tool_pricing_label: {
+    en: "Pricing Model",
+    hi: "मूल्य योजना",
+    hinglish: "Pricing Model",
+  },
+  new_tool_pricing_placeholder: {
+    en: "Select pricing model",
+    hi: "मूल्य योजना चुनें",
+    hinglish: "Pricing model chuno",
+  },
+  new_tool_submit_btn: {
+    en: "Submit Tool",
+    hi: "टूल जमा करें",
+    hinglish: "Tool Submit Karo",
+  },
+  new_tool_footer_text: {
+    en: "By submitting, you agree to our Terms of Service and Privacy Policy.",
+    hi: "जमा करके, आप हमारी सेवा की शर्तों और गोपनीयता नीति से सहमत हैं।",
+    hinglish:
+      "Submit karke, aap hamari Terms of Service aur Privacy Policy se sehmat hain.",
+  },
 
   // ── Review Form ──────────────────────────────────────────
   review_title: {
