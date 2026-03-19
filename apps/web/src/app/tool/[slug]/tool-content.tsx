@@ -8,7 +8,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export function ToolShortDescription({ tool }: { tool: any }) {
   const { t } = useLanguage();
   return (
-    <>{t(tool.description_en, tool.description_hi) || tool.description_en}</>
+    <>
+      {t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
+        tool.description_en}
+    </>
   );
 }
 
@@ -34,9 +37,11 @@ export function ToolDetailBackLink() {
 
 export function ToolDescription({ tool }: { tool: any }) {
   const { t, ui } = useLanguage();
-  const name = t(tool.name_en, tool.name_hi) || tool.name_en;
+  const name =
+    t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name_en;
   const desc =
-    t(tool.description_en, tool.description_hi) || tool.description_en;
+    t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
+    tool.description_en;
 
   return (
     <>
@@ -60,7 +65,9 @@ export function ToolDescription({ tool }: { tool: any }) {
 
 export function ToolName({ tool }: { tool: any }) {
   const { t } = useLanguage();
-  return <>{t(tool.name_en, tool.name_hi) || tool.name_en}</>;
+  return (
+    <>{t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name_en}</>
+  );
 }
 
 export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
@@ -71,7 +78,11 @@ export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
       href={`/categories/${toolCategory.slug}`}
       className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-accent text-accent-foreground hover:bg-accent/80"
     >
-      {t(toolCategory.name_en, toolCategory.name_hi)}
+      {t(
+        toolCategory.name_en,
+        toolCategory.name_hi,
+        toolCategory.name_hinglish,
+      )}
     </Link>
   );
 }

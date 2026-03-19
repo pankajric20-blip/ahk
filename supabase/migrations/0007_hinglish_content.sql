@@ -1,327 +1,511 @@
 -- ============================================================
--- AIHKYA: Add Hinglish columns + populate Hinglish content
--- Migration 0007
--- Run this in Supabase SQL Editor
+-- AIHKYA: Hinglish names AND descriptions for ALL 100 tools
+-- Migration 0007 (complete — all 100 tools)
 -- ============================================================
 
--- ============================================================
--- PART 1: Add new columns for Hinglish content
--- ============================================================
+-- STEP 1: Ensure columns exist (idempotent)
 ALTER TABLE public.ai_tools
   ADD COLUMN IF NOT EXISTS name_hinglish VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS tagline_hinglish VARCHAR(500),
   ADD COLUMN IF NOT EXISTS description_hinglish TEXT;
 
--- ============================================================
--- PART 2: Populate name_hinglish for all tools
--- Hinglish = Roman script transliteration of the tool name
--- (most tool names are already English brands — keep as-is)
--- ============================================================
+-- STEP 2: Set name_hinglish for all tools
 UPDATE public.ai_tools SET name_hinglish = CASE slug
-  WHEN 'chatgpt'               THEN 'ChatGPT'
-  WHEN 'claude'                THEN 'Claude'
-  WHEN 'gemini'                THEN 'Gemini'
-  WHEN 'perplexity-ai'         THEN 'Perplexity AI'
-  WHEN 'microsoft-copilot'     THEN 'Microsoft Copilot'
-  WHEN 'meta-ai'               THEN 'Meta AI'
-  WHEN 'grok'                  THEN 'Grok'
-  WHEN 'you-com'               THEN 'You.com'
-  WHEN 'character-ai'          THEN 'Character AI'
-  WHEN 'poe'                   THEN 'Poe'
-  WHEN 'jasper-ai'             THEN 'Jasper AI'
-  WHEN 'writesonic'            THEN 'Writesonic'
-  WHEN 'copy-ai'               THEN 'Copy.AI'
-  WHEN 'rytr'                  THEN 'Rytr'
-  WHEN 'quillbot'              THEN 'QuillBot'
-  WHEN 'midjourney'            THEN 'Midjourney'
-  WHEN 'dall-e-3'              THEN 'DALL-E 3'
-  WHEN 'leonardo-ai'           THEN 'Leonardo AI'
-  WHEN 'ideogram'              THEN 'Ideogram'
-  WHEN 'canva-ai-magic-studio' THEN 'Canva AI Magic Studio'
-  WHEN 'canva'                 THEN 'Canva'
-  WHEN 'adobe-firefly'         THEN 'Adobe Firefly'
-  WHEN 'stable-diffusion'      THEN 'Stable Diffusion'
-  WHEN 'playground-ai'         THEN 'Playground AI'
-  WHEN 'clipdrop'              THEN 'ClipDrop'
-  WHEN 'remove-bg'             THEN 'Remove.bg'
-  WHEN 'photoshop-ai'          THEN 'Photoshop AI'
-  WHEN 'runway-ml'             THEN 'Runway ML'
-  WHEN 'pika'                  THEN 'Pika'
-  WHEN 'sora'                  THEN 'Sora'
-  WHEN 'luma-ai'               THEN 'Luma AI'
-  WHEN 'kling-ai'              THEN 'Kling AI'
-  WHEN 'invideo-ai'            THEN 'InVideo AI'
-  WHEN 'descript'              THEN 'Descript'
-  WHEN 'opus-clip'             THEN 'Opus Clip'
-  WHEN 'vidyo-ai'              THEN 'Vidyo AI'
-  WHEN 'pictory-ai'            THEN 'Pictory AI'
-  WHEN 'synthesia'             THEN 'Synthesia'
-  WHEN 'heygen'                THEN 'HeyGen'
-  WHEN 'd-id'                  THEN 'D-ID'
-  WHEN 'capcut'                THEN 'CapCut'
-  WHEN 'notion-ai'             THEN 'Notion AI'
-  WHEN 'grammarly'             THEN 'Grammarly'
-  WHEN 'hemingway-editor'      THEN 'Hemingway Editor'
-  WHEN 'surfer-seo'            THEN 'Surfer SEO'
-  WHEN 'semrush-ai'            THEN 'SEMrush AI'
-  WHEN 'frase-io'              THEN 'Frase.io'
-  WHEN 'wordtune'              THEN 'Wordtune'
-  WHEN 'github-copilot'        THEN 'GitHub Copilot'
-  WHEN 'cursor'                THEN 'Cursor'
-  WHEN 'tabnine'               THEN 'Tabnine'
-  WHEN 'codeium'               THEN 'Codeium'
-  WHEN 'replit'                THEN 'Replit'
-  WHEN 'v0-dev'                THEN 'V0 by Vercel'
-  WHEN 'bolt-new'              THEN 'Bolt.new'
-  WHEN 'lovable'               THEN 'Lovable'
-  WHEN 'windsurf'              THEN 'Windsurf'
-  WHEN 'devin'                 THEN 'Devin AI'
-  WHEN 'cline'                 THEN 'Cline'
-  WHEN 'otter-ai'              THEN 'Otter AI'
-  WHEN 'fireflies-ai'          THEN 'Fireflies AI'
-  WHEN 'circleback'            THEN 'Circleback'
-  WHEN 'reclaim-ai'            THEN 'Reclaim AI'
-  WHEN 'motion-ai'             THEN 'Motion AI'
-  WHEN 'mem-ai'                THEN 'Mem AI'
-  WHEN 'anyword'               THEN 'Anyword'
-  WHEN 'beehiiv'               THEN 'Beehiiv'
-  WHEN 'taskade'               THEN 'Taskade'
-  WHEN 'suno-ai'               THEN 'Suno AI'
-  WHEN 'udio'                  THEN 'Udio'
-  WHEN 'elevenlabs'            THEN 'ElevenLabs'
-  WHEN 'murf-ai'               THEN 'Murf AI'
-  WHEN 'descript-overdub'      THEN 'Descript Overdub'
-  WHEN 'adobe-podcast'         THEN 'Adobe Podcast'
-  WHEN 'soundraw'              THEN 'Soundraw'
-  WHEN 'aiva'                  THEN 'AIVA'
-  WHEN 'mubert'                THEN 'Mubert'
-  WHEN 'beautiful-ai'          THEN 'Beautiful.ai'
-  WHEN 'gamma-app'             THEN 'Gamma'
-  WHEN 'tome-ai'               THEN 'Tome AI'
-  WHEN 'salesforce-einstein'   THEN 'Salesforce Einstein'
-  WHEN 'hubspot-ai'            THEN 'HubSpot AI'
-  WHEN 'zoho-zia'              THEN 'Zoho Zia'
-  WHEN 'khanmigo'              THEN 'Khanmigo'
-  WHEN 'duolingo-max'          THEN 'Duolingo Max'
-  WHEN 'photomath'             THEN 'Photomath'
-  WHEN 'wolfram-alpha'         THEN 'Wolfram Alpha'
-  WHEN 'socratic'              THEN 'Socratic by Google'
-  WHEN 'chegg-ai'              THEN 'Chegg AI'
-  WHEN 'brainly'               THEN 'Brainly'
-  WHEN 'byju-ai'               THEN 'Byju''s AI'
+  -- Chat & AI Assistants
+  WHEN 'chatgpt'                 THEN 'ChatGPT'
+  WHEN 'claude'                  THEN 'Claude'
+  WHEN 'gemini'                  THEN 'Gemini'
+  WHEN 'perplexity-ai'           THEN 'Perplexity AI'
+  WHEN 'notebooklm'              THEN 'NotebookLM'
+  WHEN 'grok'                    THEN 'Grok'
+  WHEN 'you-com'                 THEN 'You.com'
+  WHEN 'character-ai'            THEN 'Character.AI'
+  WHEN 'poe'                     THEN 'Poe'
+  WHEN 'microsoft-copilot'       THEN 'Microsoft Copilot'
+  WHEN 'meta-ai'                 THEN 'Meta AI'
+  -- Image & Design
+  WHEN 'midjourney'              THEN 'Midjourney'
+  WHEN 'dall-e-3'                THEN 'DALL-E 3'
+  WHEN 'leonardo-ai'             THEN 'Leonardo AI'
+  WHEN 'ideogram'                THEN 'Ideogram'
+  WHEN 'canva-ai-magic-studio'   THEN 'Canva AI Magic Studio'
+  WHEN 'adobe-firefly'           THEN 'Adobe Firefly'
+  WHEN 'stable-diffusion'        THEN 'Stable Diffusion'
+  WHEN 'playground-ai'           THEN 'Playground AI'
+  WHEN 'clipdrop'                THEN 'Clipdrop'
+  WHEN 'removebg'                THEN 'Remove.bg'
+  WHEN 'photoshop-ai'            THEN 'Photoshop AI'
+  WHEN 'figma-ai'                THEN 'Figma AI'
+  WHEN 'photoroom'               THEN 'PhotoRoom'
+  WHEN 'looka'                   THEN 'Looka'
+  WHEN 'pixelcut'                THEN 'Pixelcut'
+  WHEN 'spline'                  THEN 'Spline'
+  WHEN 'brandmark'               THEN 'Brandmark'
+  WHEN 'penpot'                  THEN 'Penpot'
+  WHEN 'krea-ai'                 THEN 'Krea AI'
+  WHEN 'bing-image-creator'      THEN 'Bing Image Creator'
+  -- Video
+  WHEN 'runway-ml'               THEN 'Runway ML'
+  WHEN 'pika'                    THEN 'Pika'
+  WHEN 'sora'                    THEN 'Sora'
+  WHEN 'luma-ai'                 THEN 'Luma AI'
+  WHEN 'kling-ai'                THEN 'Kling AI'
+  WHEN 'invideo-ai'              THEN 'InVideo AI'
+  WHEN 'descript'                THEN 'Descript'
+  WHEN 'opus-clip'               THEN 'Opus Clip'
+  WHEN 'vidyo-ai'                THEN 'Vidyo.ai'
+  WHEN 'pictory-ai'              THEN 'Pictory AI'
+  WHEN 'pictory'                 THEN 'Pictory'
+  WHEN 'synthesia'               THEN 'Synthesia'
+  WHEN 'heygen'                  THEN 'HeyGen'
+  WHEN 'd-id'                    THEN 'D-ID'
+  WHEN 'capcut'                  THEN 'CapCut'
+  WHEN 'fliki'                   THEN 'Fliki'
+  WHEN 'lumen5'                  THEN 'Lumen5'
+  WHEN 'beautiful-ai'            THEN 'Beautiful.ai'
+  -- Writing & Content
+  WHEN 'notion-ai'               THEN 'Notion AI'
+  WHEN 'grammarly'               THEN 'Grammarly'
+  WHEN 'hemingway-editor'        THEN 'Hemingway Editor'
+  WHEN 'surfer-seo'              THEN 'Surfer SEO'
+  WHEN 'semrush-ai'              THEN 'Semrush AI'
+  WHEN 'semrush'                 THEN 'Semrush'
+  WHEN 'frase-io'                THEN 'Frase.io'
+  WHEN 'wordtune'                THEN 'Wordtune'
+  WHEN 'jasper-ai'               THEN 'Jasper AI'
+  WHEN 'jasper'                  THEN 'Jasper'
+  WHEN 'writesonic'              THEN 'Writesonic'
+  WHEN 'copy-ai'                 THEN 'Copy.ai'
+  WHEN 'copyai'                  THEN 'Copy.ai'
+  WHEN 'rytr'                    THEN 'Rytr'
+  WHEN 'quillbot'                THEN 'QuillBot'
+  WHEN 'napkin-ai'               THEN 'Napkin AI'
+  WHEN 'gamma-app'               THEN 'Gamma App'
+  WHEN 'gamma'                   THEN 'Gamma'
+  WHEN 'tome-ai'                 THEN 'Tome AI'
+  WHEN 'tome'                    THEN 'Tome'
+  WHEN 'jenni-ai'                THEN 'Jenni AI'
+  -- Coding & Dev
+  WHEN 'github-copilot'          THEN 'GitHub Copilot'
+  WHEN 'cursor'                  THEN 'Cursor'
+  WHEN 'tabnine'                 THEN 'Tabnine'
+  WHEN 'codeium'                 THEN 'Codeium'
+  WHEN 'replit'                  THEN 'Replit'
+  WHEN 'v0-dev'                  THEN 'V0 Dev'
+  WHEN 'v0-by-vercel'            THEN 'V0 by Vercel'
+  WHEN 'bolt-new'                THEN 'Bolt.new'
+  WHEN 'boltnew'                 THEN 'Bolt.new'
+  WHEN 'lovable'                 THEN 'Lovable'
+  WHEN 'windsurf'                THEN 'Windsurf'
+  WHEN 'devin'                   THEN 'Devin'
+  WHEN 'cline'                   THEN 'Cline'
+  WHEN 'claude-code'             THEN 'Claude Code'
+  WHEN 'framer'                  THEN 'Framer'
+  WHEN 'supabase'                THEN 'Supabase'
+  WHEN 'railway'                 THEN 'Railway'
+  WHEN 'n8n'                     THEN 'n8n'
+  -- Productivity
+  WHEN 'otter-ai'                THEN 'Otter.ai'
+  WHEN 'otterai'                 THEN 'Otter.ai'
+  WHEN 'fireflies-ai'            THEN 'Fireflies.ai'
+  WHEN 'circleback'              THEN 'Circleback'
+  WHEN 'reclaim-ai'              THEN 'Reclaim AI'
+  WHEN 'motion-ai'               THEN 'Motion AI'
+  WHEN 'motion'                  THEN 'Motion'
+  WHEN 'mem-ai'                  THEN 'Mem AI'
+  WHEN 'anyword'                 THEN 'Anyword'
+  WHEN 'beehiiv'                 THEN 'Beehiiv'
+  WHEN 'taskade'                 THEN 'Taskade'
+  WHEN 'clickup-ai'              THEN 'ClickUp AI'
+  WHEN 'zapier'                  THEN 'Zapier'
+  WHEN 'make-com'                THEN 'Make.com'
+  WHEN 'superhuman'              THEN 'Superhuman'
+  WHEN 'mymind'                  THEN 'MyMind'
+  WHEN 'speechify'               THEN 'Speechify'
+  WHEN 'krisp'                   THEN 'Krisp'
+  -- Music & Audio
+  WHEN 'suno-ai'                 THEN 'Suno AI'
+  WHEN 'udio'                    THEN 'Udio'
+  WHEN 'elevenlabs'              THEN 'ElevenLabs'
+  WHEN 'murf-ai'                 THEN 'Murf AI'
+  WHEN 'descript-overdub'        THEN 'Descript Overdub'
+  WHEN 'adobe-podcast'           THEN 'Adobe Podcast'
+  WHEN 'soundraw'                THEN 'Soundraw'
+  WHEN 'aiva'                    THEN 'AIVA'
+  WHEN 'mubert'                  THEN 'Mubert'
+  -- Business
+  WHEN 'salesforce-einstein'     THEN 'Salesforce Einstein'
+  WHEN 'hubspot-ai'              THEN 'HubSpot AI'
+  WHEN 'zoho-zia'                THEN 'Zoho Zia'
+  WHEN 'tidio'                   THEN 'Tidio'
+  WHEN 'intercom'                THEN 'Intercom'
+  WHEN 'vyapar'                  THEN 'Vyapar'
+  WHEN 'hootsuite-owlywriter-ai' THEN 'Hootsuite OwlyWriter AI'
+  WHEN 'buffer'                  THEN 'Buffer'
+  WHEN 'later'                   THEN 'Later'
+  WHEN 'apollo-io'               THEN 'Apollo.io'
+  WHEN 'instantly-ai'            THEN 'Instantly.ai'
+  WHEN 'mailchimp-ai'            THEN 'Mailchimp AI'
+  WHEN 'ahrefs'                  THEN 'Ahrefs'
+  WHEN 'predis-ai'               THEN 'Predis.ai'
+  WHEN 'brevo'                   THEN 'Brevo'
+  WHEN 'adcreativeai'            THEN 'AdCreative.ai'
+  -- Education
+  WHEN 'khanmigo'                THEN 'Khanmigo'
+  WHEN 'duolingo-max'            THEN 'Duolingo Max'
+  WHEN 'photomath'               THEN 'Photomath'
+  WHEN 'wolfram-alpha'           THEN 'Wolfram Alpha'
+  WHEN 'socratic'                THEN 'Socratic by Google'
+  WHEN 'chegg-ai'                THEN 'Chegg Study AI'
+  WHEN 'brainly'                 THEN 'Brainly'
+  WHEN 'byju-ai'                 THEN 'BYJU''S AI'
+  WHEN 'kahoot-ai'               THEN 'Kahoot AI'
+  WHEN 'consensus'               THEN 'Consensus'
+  WHEN 'quizlet-ai'              THEN 'Quizlet AI'
+  WHEN 'teachable'               THEN 'Teachable'
+  WHEN 'elicit'                  THEN 'Elicit'
+  WHEN 'mentimeter'              THEN 'Mentimeter'
+  WHEN 'scholarcy'               THEN 'Scholarcy'
+  -- Data
+  WHEN 'julius-ai'               THEN 'Julius AI'
+  WHEN 'rows-ai'                 THEN 'Rows AI'
+  WHEN 'polymer'                 THEN 'Polymer'
+  WHEN 'monkeylearn'             THEN 'MonkeyLearn'
+  WHEN 'coefficient'             THEN 'Coefficient'
+  WHEN 'sheet+-/-sheetgpt'       THEN 'SheetGPT'
   ELSE name_en
 END;
 
--- ============================================================
--- PART 3: Populate description_hinglish for all tools
--- Hinglish = Mix of Hindi and English in Roman script
--- ============================================================
+-- STEP 3: Set description_hinglish for all 100 tools
+UPDATE public.ai_tools SET description_hinglish = CASE slug
+  -- Chat & AI Assistants
+  WHEN 'chatgpt'
+    THEN 'OpenAI ka sabse popular AI chatbot — questions poochho, code likhwao, content banao, sab kuch ek jagah.'
+  WHEN 'claude'
+    THEN 'Anthropic ka safe aur accurate AI assistant — bade documents padhne, coding, aur research ke liye best.'
+  WHEN 'gemini'
+    THEN 'Google ka AI model jo text, code, image aur audio samajhke kaam karta hai — Google apps mein bhi kaam karta hai.'
+  WHEN 'perplexity-ai'
+    THEN 'Ek AI search engine jo real-time internet se sourced aur accurate jawab deta hai.'
+  WHEN 'notebooklm'
+    THEN 'Google ka AI tool jo aapke documents analyze karta hai aur podcast bhi bana sakta hai.'
+  WHEN 'grok'
+    THEN 'X (Twitter) ka AI chatbot jo real-time data aur bina filter ke jawab deta hai.'
+  WHEN 'you-com'
+    THEN 'Ek AI-powered search engine jo har sawaal ka jawab source ke saath deta hai.'
+  WHEN 'character-ai'
+    THEN 'AI chatbot platform jahan aap famous characters aur celebrities jaisi bots se baat kar sakte ho.'
+  WHEN 'poe'
+    THEN 'Ek jagah par ChatGPT, Claude, Gemini aur kai AI models use karo — Poe sab ek app mein deta hai.'
+  WHEN 'microsoft-copilot'
+    THEN 'Microsoft ka AI assistant jo web search, content likhna aur productivity mein madad karta hai.'
+  WHEN 'meta-ai'
+    THEN 'Meta ka free AI assistant jo WhatsApp, Instagram aur Facebook par available hai.'
+  -- Image & Design
+  WHEN 'midjourney'
+    THEN 'Duniya ka sabse popular AI image generator — bas text prompt likho aur stunning artwork milta hai.'
+  WHEN 'dall-e-3'
+    THEN 'OpenAI ka image generator jo ChatGPT ke andar use hota hai — text se beautiful images banao.'
+  WHEN 'leonardo-ai'
+    THEN 'Professional quality AI images aur art banane ka ek behtareen tool — daily free credits bhi milte hain.'
+  WHEN 'ideogram'
+    THEN 'Text-in-image ke liye best AI image generator — logos, posters aur banners ke liye perfect.'
+  WHEN 'canva-ai-magic-studio'
+    THEN 'Canva mein built-in AI jo magic edit, background removal aur auto-design karta hai — non-designers ke liye best.'
+  WHEN 'adobe-firefly'
+    THEN 'Adobe ka AI image generator jo professional designers ke liye bana hai.'
+  WHEN 'stable-diffusion'
+    THEN 'Open-source AI image generator jo local aur online dono tarike se use kiya ja sakta hai.'
+  WHEN 'playground-ai'
+    THEN 'Designers ke liye ek muft AI image generator.'
+  WHEN 'clipdrop'
+    THEN 'Ek all-in-one AI image editing suite — background hatao, colors fix karo, images clean karo.'
+  WHEN 'removebg'
+    THEN 'Kisi bhi image ka background seconds mein hatane ka sabse aasaan aur fast online tool.'
+  WHEN 'photoshop-ai'
+    THEN 'Adobe Photoshop mein AI features — generative fill, object removal aur smart editing ke liye.'
+  WHEN 'figma-ai'
+    THEN 'Figma ke andar AI features design generation aur editing ke liye — UI/UX designers ke liye best.'
+  WHEN 'photoroom'
+    THEN 'AI photo studio product photography aur social content ke liye — background hatao, studio quality pao.'
+  WHEN 'looka'
+    THEN 'AI logo generator jo minutes mein complete brand kit banata hai — naye businesses ke liye best.'
+  WHEN 'pixelcut'
+    THEN 'Mobile se e-commerce product photos banane ka AI photo editor — sellers ke liye perfect.'
+  WHEN 'spline'
+    THEN 'Web aur apps ke liye free 3D design tool jisme AI generation hai — interactive scenes banao.'
+  WHEN 'brandmark'
+    THEN 'AI se professional logo design karo font aur colour recommendations ke saath.'
+  WHEN 'penpot'
+    THEN 'Figma ka free open-source alternative — students aur freelancers ke liye perfect.'
+  WHEN 'krea-ai'
+    THEN 'Real-time AI image generation aur enhancement tool — designers aur creators ke liye.'
+  WHEN 'bing-image-creator'
+    THEN 'Microsoft ka free AI image generator jo DALL-E 3 use karta hai — koi payment nahi chahiye.'
+  -- Video & Reels
+  WHEN 'runway-ml'
+    THEN 'Professional AI video generation aur editing platform — short films, ads aur reels sab bana sakte ho.'
+  WHEN 'pika'
+    THEN 'Text ya image se cinematic AI video clips banane ka ek popular aur easy tool.'
+  WHEN 'sora'
+    THEN 'OpenAI ka video generation model jo text se high-quality realistic videos banata hai.'
+  WHEN 'luma-ai'
+    THEN 'Photos ya text se 3D aur cinematic videos banane ka ek powerful AI video platform.'
+  WHEN 'kling-ai'
+    THEN 'High quality realistic AI videos banane ka ek popular tool.'
+  WHEN 'invideo-ai'
+    THEN 'Script se professional marketing videos aur reels minutes mein banane ka ek Indian AI tool.'
+  WHEN 'descript'
+    THEN 'Audio aur video ko text ki tarah edit karo — podcast creators aur educators ke liye best.'
+  WHEN 'opus-clip'
+    THEN 'Lambe videos ko social media ke liye chhote aur attractive clips mein badalne wala AI tool.'
+  WHEN 'vidyo-ai'
+    THEN 'YouTube aur podcasts ko social media clips mein automatically cut karne ka AI tool.'
+  WHEN 'pictory-ai'
+    THEN 'Blog ya script se AI voiceover ke saath professional videos banane ka ek aasan platform.'
+  WHEN 'pictory'
+    THEN 'Blog ya script se AI voiceover ke saath professional videos banane ka ek aasan platform.'
+  WHEN 'synthesia'
+    THEN 'Text ya script se custom avatars ke saath professional videos banao — camera ki zaroorat nahi.'
+  WHEN 'heygen'
+    THEN 'Text ya script se bolne wale realistic avatar videos banane ka ek popular AI video platform.'
+  WHEN 'd-id'
+    THEN 'Photos se animated avatar aur videos banane wala AI tool.'
+  WHEN 'capcut'
+    THEN 'TikTok aur Instagram Reels jaisi short videos banane ka sabse popular free video editor.'
+  WHEN 'fliki'
+    THEN 'AI video maker jisme text-to-video aur voice generation hai — Hindi mein bhi kaam karta hai.'
+  WHEN 'lumen5'
+    THEN 'Blog posts ko marketing videos mein convert karne ka AI video creator.'
+  WHEN 'beautiful-ai'
+    THEN 'AI presentation maker jisme smart templates aur auto-design hai — professional slides minutes mein.'
+  -- Writing & Content
+  WHEN 'notion-ai'
+    THEN 'Notes lene, projects manage karne aur ai se content likhne ka ek all-in-one workspace.'
+  WHEN 'grammarly'
+    THEN 'Grammar, spelling aur clarity check karne ka AI writing assistant — English aur Hindi dono mein.'
+  WHEN 'hemingway-editor'
+    THEN 'Aapki writing ko simple, clear aur impactful banane ka ek free online editing tool.'
+  WHEN 'surfer-seo'
+    THEN 'SEO-optimized articles, blog posts aur marketing content likhne ka ek advanced AI tool.'
+  WHEN 'semrush-ai'
+    THEN 'Digital marketing aur SEO ke liye ek all-in-one AI platform.'
+  WHEN 'semrush'
+    THEN 'SEO, PPC aur content marketing ke liye ek comprehensive all-in-one digital marketing platform.'
+  WHEN 'frase-io'
+    THEN 'SEO-friendly blogs aur articles likhne ke liye AI research aur writing ka ek complete tool.'
+  WHEN 'wordtune'
+    THEN 'Kisi bhi likhe hue text ko better aur impactful tarike se dobara likhne wala AI writing assistant.'
+  WHEN 'jasper-ai'
+    THEN 'Marketing, blogging aur business content likhne ke liye ek powerful AI writing tool.'
+  WHEN 'jasper'
+    THEN 'Marketing copy, ads, blogs aur social media content likhne ka ek popular AI tool.'
+  WHEN 'writesonic'
+    THEN 'Blogs, ads aur product descriptions SEO ke saath likhne ka AI writer.'
+  WHEN 'copy-ai'
+    THEN 'Sales copy, emails aur social posts likhne wala popular AI copywriting tool.'
+  WHEN 'copyai'
+    THEN 'Sales copy, emails aur social posts likhne wala popular AI copywriting tool.'
+  WHEN 'rytr'
+    THEN 'Blogs, emails aur social media ke liye low cost mein AI content generate karne ka ek useful tool.'
+  WHEN 'quillbot'
+    THEN 'Kisi bhi text ko better aur impactful tarike se rewrite karne wala AI writing assistant.'
+  WHEN 'napkin-ai'
+    THEN 'Text ko visual diagrams aur illustrations mein badalne wala AI tool — presentations ke liye perfect.'
+  WHEN 'gamma-app'
+    THEN 'Text se interactive presentations, documents aur webpages banane ka ek popular AI tool.'
+  WHEN 'gamma'
+    THEN 'Text se interactive presentations, documents aur webpages banane ka ek popular AI tool.'
+  WHEN 'tome-ai'
+    THEN 'Story-style presentations aur pitch decks banane ke liye ek AI-assisted narrative platform.'
+  WHEN 'tome'
+    THEN 'Story-style presentations aur pitch decks banane ke liye ek AI-assisted narrative platform.'
+  WHEN 'jenni-ai'
+    THEN 'Academic papers aur research ke liye AI writing assistant — PhD students ke liye perfect.'
+  -- Coding & Dev
+  WHEN 'github-copilot'
+    THEN 'Developers ke liye ek AI coding assistant jo real time mein code snippets aur functions suggest karta hai.'
+  WHEN 'cursor'
+    THEN 'VS Code par based ek advanced AI code editor jo puri coding process ko supercharge karta hai.'
+  WHEN 'tabnine'
+    THEN 'Code autocomplete aur suggestions dene wala AI tool jo VS Code aur other editors mein kaam karta hai.'
+  WHEN 'codeium'
+    THEN 'GitHub Copilot ka ek behtareen free AI code assistant.'
+  WHEN 'replit'
+    THEN 'Browser mein code likhne, run karne aur share karne ka online coding platform.'
+  WHEN 'v0-dev'
+    THEN 'Seconds mein modern UI components aur web design banane ka ek AI tool.'
+  WHEN 'v0-by-vercel'
+    THEN 'Text descriptions se React UI components banana ka AI tool — frontend developers ke liye.'
+  WHEN 'bolt-new'
+    THEN 'Text se complete web apps aur projects banane ka ek AI-powered full-stack development platform.'
+  WHEN 'boltnew'
+    THEN 'Text se complete web apps aur projects banane ka ek AI-powered full-stack development platform.'
+  WHEN 'lovable'
+    THEN 'Idea se poori tarah kaam karne wala web app banane wala ek AI-first app builder.'
+  WHEN 'windsurf'
+    THEN 'Cursor ki tarah ek AI-powered code editor jo aapka pura codebase samajhke smart suggestions deta hai.'
+  WHEN 'devin'
+    THEN 'Ek autonomous AI software engineer jo bug fix se lekar poore features develop karne tak ka kaam khud kar sakta hai.'
+  WHEN 'cline'
+    THEN 'VS Code extension jo Claude AI ko aapke editor mein join karke coding, debugging mein madad karta hai.'
+  WHEN 'claude-code'
+    THEN 'Anthropic ka CLI coding agent jo autonomous development tasks karta hai.'
+  WHEN 'framer'
+    THEN 'AI-powered website builder jisme beautiful templates aur animations hain.'
+  WHEN 'supabase'
+    THEN 'Open source Firebase alternative jisme PostgreSQL, auth aur storage hai — developers ke liye best.'
+  WHEN 'railway'
+    THEN 'Apps, databases aur services deploy karne ka ek simple cloud platform.'
+  WHEN 'n8n'
+    THEN '400+ integrations aur AI nodes ke saath open source workflow automation — khud host karo free mein.'
+  -- Productivity
+  WHEN 'otter-ai'
+    THEN 'Meetings record karne, transcribe karne aur summary banane ka AI note-taking assistant.'
+  WHEN 'otterai'
+    THEN 'Meetings record karne, transcribe karne aur summary banane ka AI assistant.'
+  WHEN 'fireflies-ai'
+    THEN 'Meetings ko automatically record aur transcribe karne wala AI tool jo action items bhi nikalata hai.'
+  WHEN 'circleback'
+    THEN 'Meeting ke baad automatically follow-up aur action items track karne wala AI productivity tool.'
+  WHEN 'reclaim-ai'
+    THEN 'Calendar ko AI se optimize karne aur time management karne ka ek smart scheduling tool.'
+  WHEN 'motion-ai'
+    THEN 'Apne tasks aur calendar ko AI se manage karke kaam aur focus time balance karne ka tool.'
+  WHEN 'motion'
+    THEN 'AI calendar jo tasks, meetings aur projects auto-schedule karta hai — focused aur productive raho.'
+  WHEN 'mem-ai'
+    THEN 'Notes aur ideas ko AI se connect karke ek smart second brain banane wala tool.'
+  WHEN 'anyword'
+    THEN 'Marketing content ko audience ke hisaab se optimize karne wala AI writing aur performance tool.'
+  WHEN 'beehiiv'
+    THEN 'Newsletter likhne aur email audience banane ka ek popular AI-assisted publishing platform.'
+  WHEN 'taskade'
+    THEN 'Team collaboration, task management aur AI se project planning ka ek all-in-one workspace.'
+  WHEN 'clickup-ai'
+    THEN 'All-in-one project management jisme AI writing aur task automation hai.'
+  WHEN 'zapier'
+    THEN '7000+ apps ko bina code ke connect karne ka automation platform.'
+  WHEN 'make-com'
+    THEN '1000+ apps ko drag-and-drop se connect karne ka visual automation platform.'
+  WHEN 'superhuman'
+    THEN 'AI-powered email client jo email likhne ki speed double karta hai.'
+  WHEN 'mymind'
+    THEN 'AI-powered bookmark aur file organizer jo auto-categorize karta hai.'
+  WHEN 'speechify'
+    THEN 'AI text-to-speech reader jo koi bhi text naturally padhke sunata hai — commute mein useful.'
+  WHEN 'krisp'
+    THEN 'AI noise cancellation aur meeting transcription calls ke liye — ghar ke noise mein bhi clear calls karo.'
+  -- Music & Audio
+  WHEN 'suno-ai'
+    THEN 'Text prompts se original gaane aur music banane ka sabse popular AI music generator.'
+  WHEN 'udio'
+    THEN 'High-quality AI-generated music banane ka ek powerful audio generation platform.'
+  WHEN 'elevenlabs'
+    THEN 'Bahut realistic aur human-jaise AI voices generate karne ka ek professional text-to-speech tool.'
+  WHEN 'murf-ai'
+    THEN 'AI voiceover aur text-to-speech jisme natural sounding Hindi voices bhi hain.'
+  WHEN 'descript-overdub'
+    THEN 'Kisi bhi aawaaz ko doosri aawaaz mein badal ke professional voiceover banane wala AI audio tool.'
+  WHEN 'adobe-podcast'
+    THEN 'Videos aur podcasts ke liye AI se background noise hatane aur audio quality sudharne ka tool.'
+  WHEN 'soundraw'
+    THEN 'Videos aur podcasts ke liye royalty-free AI-generated background music banane ka tool.'
+  WHEN 'aiva'
+    THEN 'Films, games aur ads ke liye original AI-composed music banane wala platform.'
+  WHEN 'mubert'
+    THEN 'Video content, podcasts aur streaming ke liye custom AI music generate karne wala tool.'
+  -- Business & Finance
+  WHEN 'salesforce-einstein'
+    THEN 'Salesforce CRM mein AI jo sales forecasting aur customer intelligence deta hai.'
+  WHEN 'hubspot-ai'
+    THEN 'HubSpot mein AI features jo marketing, sales aur customer service automate karte hain.'
+  WHEN 'zoho-zia'
+    THEN 'Zoho CRM mein AI assistant jo sales forecasting aur customer analysis karta hai.'
+  WHEN 'tidio'
+    THEN 'Websites ke liye AI customer support chatbot — 24/7 customers ki help karo.'
+  WHEN 'intercom'
+    THEN 'AI-first customer service platform jisme chatbot aur help desk hai — SaaS companies ke liye best.'
+  WHEN 'vyapar'
+    THEN 'India ka #1 billing aur accounting app chhote vyapaaron ke liye — GST billing Hindi mein karo.'
+  WHEN 'hootsuite-owlywriter-ai'
+    THEN 'AI content suggestions ke saath social media management — agencies ke liye best.'
+  WHEN 'buffer'
+    THEN 'Small businesses ke liye affordable social media scheduling ka AI assistant.'
+  WHEN 'later'
+    THEN 'Instagram creators ke liye scheduled posting aur AI caption writing tool.'
+  WHEN 'apollo-io'
+    THEN 'AI-powered B2B lead generation aur sales intelligence platform — leads dhundho aur cold email bhejo.'
+  WHEN 'instantly-ai'
+    THEN 'Cold email outreach platform jisme AI-powered email warmup hai — international clients dhundho.'
+  WHEN 'mailchimp-ai'
+    THEN 'Email marketing jisme AI content optimizer aur audience segmentation hai.'
+  WHEN 'ahrefs'
+    THEN 'Backlinks, keyword research aur site audits ke liye best SEO toolset.'
+  WHEN 'predis-ai'
+    THEN 'Posts, reels aur ads ke liye AI social media content generator — ek click mein content ready.'
+  WHEN 'brevo'
+    THEN 'Email, SMS, WhatsApp aur CRM ke saath ek all-in-one marketing platform.'
+  WHEN 'adcreativeai'
+    THEN 'Social media aur Google Ads ke liye AI-generated ad creatives — high converting banao.'
+  -- Education
+  WHEN 'khanmigo'
+    THEN 'Khan Academy ka AI tutor jo students ko individually samajhke math aur science sikhata hai.'
+  WHEN 'duolingo-max'
+    THEN 'Duolingo ka AI-powered premium experience jo bhasha seekhna aur bhi mazedaar banata hai.'
+  WHEN 'photomath'
+    THEN 'Camera se math ke sawaal scan karke step-by-step solution batane wala AI math solver.'
+  WHEN 'wolfram-alpha'
+    THEN 'Math, science aur engineering ke complex sawaalon ke liye duniya ka sabse powerful AI engine.'
+  WHEN 'socratic'
+    THEN 'Google ka free AI homework helper jo photo se sawaal pehchankar step-by-step jawab deta hai.'
+  WHEN 'chegg-ai'
+    THEN 'Students ko homework, assignments aur exam preparation mein AI se help karne wala education platform.'
+  WHEN 'brainly'
+    THEN 'Duniyabhar ke students aur experts ka Q&A platform jo ab AI-assisted jawab deta hai.'
+  WHEN 'byju-ai'
+    THEN 'Indian students ke liye popular EdTech platform jo AI se personal learning experience deta hai.'
+  WHEN 'kahoot-ai'
+    THEN 'Education ke liye AI-powered quiz aur game creation — teachers ke liye best.'
+  WHEN 'consensus'
+    THEN 'Scientific research papers ke liye AI search engine — researchers ke liye perfect.'
+  WHEN 'quizlet-ai'
+    THEN 'AI-powered flashcards aur study tools students ke liye — competitive exams ki taiyaari ke liye.'
+  WHEN 'teachable'
+    THEN 'Online course platform jisme AI-powered curriculum builder hai — paid courses sell karo.'
+  WHEN 'elicit'
+    THEN 'AI research assistant jo academic papers dhundhta aur summarize karta hai — PhD scholars ke liye.'
+  WHEN 'mentimeter'
+    THEN 'Live polls aur quizzes ke saath AI-powered interactive presentations — teachers aur trainers ke liye.'
+  WHEN 'scholarcy'
+    THEN 'AI article summarizer jo papers se flashcards banata hai — research students ke liye.'
+  WHEN 'socratic'
+    THEN 'Google ka free AI tutor app jo camera se homework solve karne mein madad karta hai.'
+  -- Data & Analytics
+  WHEN 'julius-ai'
+    THEN 'AI data analyst jo CSV aur spreadsheet data ke baare mein sawaalon ka jawab deta hai — no coding needed.'
+  WHEN 'sheet+-/-sheetgpt'
+    THEN 'Google Sheets aur Excel ke liye AI formula generator — complex formulas easily likho.'
+  WHEN 'rows-ai'
+    THEN 'AI-powered spreadsheet jo aapke data ke baare mein sawaalon ka jawab deta hai aur charts banata hai.'
+  WHEN 'polymer'
+    THEN 'Spreadsheets se beautiful dashboards banane ka AI-powered data visualization builder.'
+  WHEN 'monkeylearn'
+    THEN 'Sentiment, classification aur extraction ke liye no-code AI text analytics — reviews analyze karo.'
+  WHEN 'coefficient'
+    THEN 'AI-powered Google Sheets add-on jo live data connections CRM, database aur APIs se deta hai.'
+  ELSE description_en
+END;
 
--- Chat & AI Assistants
-UPDATE public.ai_tools SET description_hinglish = 'OpenAI ka powerful AI chatbot jo questions ka jawab de sakta hai, content likh sakta hai aur coding mein help karta hai.'
-  WHERE slug = 'chatgpt';
-UPDATE public.ai_tools SET description_hinglish = 'Anthropic ka safe aur accurate AI assistant jo bade documents padhne aur complex coding tasks ke liye best hai.'
-  WHERE slug = 'claude';
-UPDATE public.ai_tools SET description_hinglish = 'Google ka most advanced AI model jo text, code, images aur audio samajh ke process kar sakta hai.'
-  WHERE slug = 'gemini';
-UPDATE public.ai_tools SET description_hinglish = 'Accurate internet searches ke liye ek AI search engine jo har answer ke saath real-time sources aur links deta hai.'
-  WHERE slug = 'perplexity-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Microsoft ka AI assistant jo web searches, content creation aur productivity mein help karta hai.'
-  WHERE slug = 'microsoft-copilot';
-UPDATE public.ai_tools SET description_hinglish = 'Meta ka free AI assistant jo WhatsApp, Instagram aur Facebook par available hai.'
-  WHERE slug = 'meta-ai';
-UPDATE public.ai_tools SET description_hinglish = 'X (Twitter) ka AI chatbot jo real-time data aur openly jawab dene ke liye jaana jaata hai.'
-  WHERE slug = 'grok';
-UPDATE public.ai_tools SET description_hinglish = 'Ek AI-powered search engine jo har sawaal ka jawab source ke saath deta hai aur real-time search karta hai.'
-  WHERE slug = 'you-com';
-UPDATE public.ai_tools SET description_hinglish = 'Ek interactive AI platform jahan aap fictional characters aur celebrity-style bots ke saath baat kar sakte hain.'
-  WHERE slug = 'character-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Ek multi-model AI platform jo ChatGPT, Claude, Gemini aur kaafi AI models ek jagah par provide karta hai.'
-  WHERE slug = 'poe';
-UPDATE public.ai_tools SET description_hinglish = 'Marketing, blogging aur business content likhne ke liye ek powerful AI writing tool.'
-  WHERE slug = 'jasper-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Marketing copy, ads aur social media posts jaldi likhne ke liye ek popular AI writing tool.'
-  WHERE slug = 'writesonic';
-UPDATE public.ai_tools SET description_hinglish = 'Blog, email aur social media ke liye kam cost mein AI-generated content banane wala ek useful tool.'
-  WHERE slug = 'rytr';
-UPDATE public.ai_tools SET description_hinglish = 'Copy.AI blog, email aur social media ke liye AI-generated content banane ka ek useful aur low-cost tool hai.'
-  WHERE slug = 'copy-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Kisi bhi likhe hue text ko better aur effective tarike se rewrite karne wala AI writing assistant.'
-  WHERE slug = 'quillbot';
+-- STEP 4: Fill any remaining NULLs with English description as safety net
+UPDATE public.ai_tools
+SET description_hinglish = description_en
+WHERE description_hinglish IS NULL OR description_hinglish = '';
 
--- Image & Design
-UPDATE public.ai_tools SET description_hinglish = 'Text se highly realistic aur artistic images banane ke liye ek best AI tool jo prompt se seedha kaam karta hai.'
-  WHERE slug = 'midjourney';
-UPDATE public.ai_tools SET description_hinglish = 'OpenAI ka image generator jo aapke text descriptions ko stunning aur accurate images mein badal deta hai.'
-  WHERE slug = 'dall-e-3';
-UPDATE public.ai_tools SET description_hinglish = 'Professional quality AI images aur art banane ke liye ek behtareen tool jo kaafi style options deta hai.'
-  WHERE slug = 'leonardo-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Text se high-quality logos, posters aur graphics banane ke liye ek upcoming AI image tool.'
-  WHERE slug = 'ideogram';
-UPDATE public.ai_tools SET description_hinglish = 'Canva mein built-in AI features jo magic edit, background removal aur auto-design ko possible banate hain.'
-  WHERE slug = 'canva-ai-magic-studio';
-UPDATE public.ai_tools SET description_hinglish = 'Ek popular graphic design tool jisme ab Magic Studio jaise powerful AI features shamil hain.'
-  WHERE slug = 'canva';
-UPDATE public.ai_tools SET description_hinglish = 'Adobe ka AI image generator jo professional designers ke liye banaya gaya hai aur commercial use ke liye safe hai.'
-  WHERE slug = 'adobe-firefly';
-UPDATE public.ai_tools SET description_hinglish = 'Open-source AI image generator jo local aur online dono tarike se use kiya ja sakta hai.'
-  WHERE slug = 'stable-diffusion';
-UPDATE public.ai_tools SET description_hinglish = 'Designers ke liye ek free AI image generator jo DALL-E aur Stable Diffusion dono ko support karta hai.'
-  WHERE slug = 'playground-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Ek all-in-one AI image editing tool jo background hatane, relighting aur cleanup ke liye bana hai.'
-  WHERE slug = 'clipdrop';
-UPDATE public.ai_tools SET description_hinglish = 'Kisi bhi image ka background seconds mein hatane ke liye sabse easy aur fast online tool.'
-  WHERE slug = 'remove-bg';
-UPDATE public.ai_tools SET description_hinglish = 'Adobe Photoshop mein add kiye gaye AI features jo Generative Fill, removal aur smart editing ko aasan banate hain.'
-  WHERE slug = 'photoshop-ai';
-
--- Video & Reels
-UPDATE public.ai_tools SET description_hinglish = 'AI ki madad se video banane aur edit karne ka ek advanced tool.'
-  WHERE slug = 'runway-ml';
-UPDATE public.ai_tools SET description_hinglish = 'Ek AI video generator jo text aur images ko cinematic video clips mein badal deta hai.'
-  WHERE slug = 'pika';
-UPDATE public.ai_tools SET description_hinglish = 'OpenAI ka video generation model jo text se high-quality aur realistic videos banata hai.'
-  WHERE slug = 'sora';
-UPDATE public.ai_tools SET description_hinglish = 'Photo ya text se 3D aur cinematic videos banane ke liye ek powerful AI video platform.'
-  WHERE slug = 'luma-ai';
-UPDATE public.ai_tools SET description_hinglish = 'High-quality realistic AI videos banane ke liye ek Chinese AI tool jo worldwide popular hai.'
-  WHERE slug = 'kling-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Script se professional marketing videos aur reels minutes mein banane ke liye ek Indian AI tool.'
-  WHERE slug = 'invideo-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Audio aur video ko text ki tarah edit karne ke liye ek simple lekin powerful AI tool.'
-  WHERE slug = 'descript';
-UPDATE public.ai_tools SET description_hinglish = 'Lambe videos ko social media ke liye short aur engaging clips mein badalne wala AI tool.'
-  WHERE slug = 'opus-clip';
-UPDATE public.ai_tools SET description_hinglish = 'YouTube aur podcast content ko chhote social media clips mein automatically kaatne wala AI tool.'
-  WHERE slug = 'vidyo-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Blog ya script se AI voiceover ke saath professional video banane ka ek aasan platform.'
-  WHERE slug = 'pictory-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Text ya script se custom avatars ke saath professional videos banane ke liye ek AI video generator.'
-  WHERE slug = 'synthesia';
-UPDATE public.ai_tools SET description_hinglish = 'Text ya script se bolne wale realistic avatar videos banane ke liye ek AI video platform.'
-  WHERE slug = 'heygen';
-UPDATE public.ai_tools SET description_hinglish = 'Photo se animated avatars aur videos banane wala AI tool jo digital human technology par kaam karta hai.'
-  WHERE slug = 'd-id';
-UPDATE public.ai_tools SET description_hinglish = 'TikTok aur Instagram Reels jaise short videos aur social media content banane ke liye ek popular app.'
-  WHERE slug = 'capcut';
-
--- Content & Writing
-UPDATE public.ai_tools SET description_hinglish = 'Notes lene, projects manage karne aur automatically content likhne ke liye AI ke saath integrated ek all-in-one workspace.'
-  WHERE slug = 'notion-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Grammar, spelling aur clarity improve karke aapki writing ko better banane wala ek AI writing assistant.'
-  WHERE slug = 'grammarly';
-UPDATE public.ai_tools SET description_hinglish = 'Aapki writing style ko simple, clear aur effective banane ke liye ek free online editing tool.'
-  WHERE slug = 'hemingway-editor';
-UPDATE public.ai_tools SET description_hinglish = 'SEO-optimized articles, blog posts aur marketing content likhne ke liye ek advanced AI tool.'
-  WHERE slug = 'surfer-seo';
-UPDATE public.ai_tools SET description_hinglish = 'Digital marketing aur SEO ke liye ek all-in-one AI platform jo ranking badhane mein help karta hai.'
-  WHERE slug = 'semrush-ai';
-UPDATE public.ai_tools SET description_hinglish = 'SEO-friendly blogs aur articles likhne ke liye AI research aur writing ka ek complete tool.'
-  WHERE slug = 'frase-io';
-UPDATE public.ai_tools SET description_hinglish = 'Kisi bhi likhe hue text ko better, simple aur effective tarike se dobara likhne wala AI writing assistant.'
-  WHERE slug = 'wordtune';
-
--- Coding & Development
-UPDATE public.ai_tools SET description_hinglish = 'Developers ke liye ek AI coding assistant jo real time mein code snippets aur functions suggest karta hai.'
-  WHERE slug = 'github-copilot';
-UPDATE public.ai_tools SET description_hinglish = 'VS Code par based ek advanced AI code editor jo aapki poori coding process ko supercharge karta hai.'
-  WHERE slug = 'cursor';
-UPDATE public.ai_tools SET description_hinglish = 'Seconds mein modern UI components aur web designs banane ke liye ek AI tool.'
-  WHERE slug = 'v0-dev';
-UPDATE public.ai_tools SET description_hinglish = 'Code autocomplete aur suggestions dene wala ek AI tool jo VS Code aur other editors mein kaam karta hai.'
-  WHERE slug = 'tabnine';
-UPDATE public.ai_tools SET description_hinglish = 'Ek free AI code assistant jo GitHub Copilot ka behtareen alternative hai aur kaafi IDEs support karta hai.'
-  WHERE slug = 'codeium';
-UPDATE public.ai_tools SET description_hinglish = 'Browser mein code likhne, run karne aur share karne ke liye ek online coding platform.'
-  WHERE slug = 'replit';
-UPDATE public.ai_tools SET description_hinglish = 'Text se poore web apps aur projects banane ke liye ek AI-powered full-stack development platform.'
-  WHERE slug = 'bolt-new';
-UPDATE public.ai_tools SET description_hinglish = 'Idea se fully working web app banane wala ek AI-first app builder.'
-  WHERE slug = 'lovable';
-UPDATE public.ai_tools SET description_hinglish = 'Cursor ki tarah ek AI-powered code editor jo aapka poora codebase samajhkar smart suggestions deta hai.'
-  WHERE slug = 'windsurf';
-UPDATE public.ai_tools SET description_hinglish = 'Ek autonomous AI software engineer jo bug fix karne se lekar poore features develop karne tak ka kaam khud kar sakta hai.'
-  WHERE slug = 'devin';
-UPDATE public.ai_tools SET description_hinglish = 'VS Code extension jo Claude AI ko aapke editor mein jodhkar coding, debugging aur refactoring mein help karta hai.'
-  WHERE slug = 'cline';
-
--- Productivity
-UPDATE public.ai_tools SET description_hinglish = 'Meetings record karne, transcribe karne aur summary banane ke liye ek AI note-taking assistant.'
-  WHERE slug = 'otter-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Meetings ko automatically record aur transcribe karne wala AI tool jo action items bhi nikalata hai.'
-  WHERE slug = 'fireflies-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Meeting ke baad automatically follow-ups aur action items track karne wala AI productivity tool.'
-  WHERE slug = 'circleback';
-UPDATE public.ai_tools SET description_hinglish = 'Aapke calendar ko AI se optimize karne aur time ki barbadi rokne wala ek smart scheduling tool.'
-  WHERE slug = 'reclaim-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Aapke tasks aur calendar ko AI se manage karke kaam aur focus time ko balance karne wala tool.'
-  WHERE slug = 'motion-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Aapke notes aur ideas ko AI se connect karke ek smart second brain banane wala tool.'
-  WHERE slug = 'mem-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Marketing content ko audience ke hisaab se optimize karne wala ek AI writing aur performance tool.'
-  WHERE slug = 'anyword';
-UPDATE public.ai_tools SET description_hinglish = 'Newsletter likhne aur email audience banane ke liye ek popular AI-assisted publishing platform.'
-  WHERE slug = 'beehiiv';
-UPDATE public.ai_tools SET description_hinglish = 'Team collaboration, task management aur AI se project planning ke liye ek all-in-one workspace.'
-  WHERE slug = 'taskade';
-
--- Music & Audio
-UPDATE public.ai_tools SET description_hinglish = 'Text prompt se original songs aur music banane ke liye sabse popular AI music generator.'
-  WHERE slug = 'suno-ai';
-UPDATE public.ai_tools SET description_hinglish = 'High-quality AI-generated music banane ke liye ek powerful audio generation platform.'
-  WHERE slug = 'udio';
-UPDATE public.ai_tools SET description_hinglish = 'Ek professional text-to-speech AI jo bahut realistic aur human-like voices generate karta hai.'
-  WHERE slug = 'elevenlabs';
-UPDATE public.ai_tools SET description_hinglish = 'Video aur podcast ke liye AI se background noise hatane aur audio quality improve karne ka tool.'
-  WHERE slug = 'adobe-podcast';
-UPDATE public.ai_tools SET description_hinglish = 'Videos aur podcasts ke liye royalty-free AI-generated background music banane ka tool.'
-  WHERE slug = 'soundraw';
-UPDATE public.ai_tools SET description_hinglish = 'Films, games aur ads ke liye original AI-composed music banane wala platform.'
-  WHERE slug = 'aiva';
-UPDATE public.ai_tools SET description_hinglish = 'Video content, podcasts aur streaming ke liye custom AI music generate karne wala tool.'
-  WHERE slug = 'mubert';
-UPDATE public.ai_tools SET description_hinglish = 'Human-quality voice cloning aur Hindi samet kai languages mein text-to-speech banane wala AI tool.'
-  WHERE slug = 'murf-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Kisi bhi awaaz ko doosri awaaz mein badal kar professional voiceover banane wala AI audio tool.'
-  WHERE slug = 'descript-overdub';
-
--- Business & Finance
-UPDATE public.ai_tools SET description_hinglish = 'Presentations aur pitch decks banane ke liye ek AI-powered tool jo automatically sundar slides taiyaar karta hai.'
-  WHERE slug = 'beautiful-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Text se interactive presentations, documents aur webpages banane wala ek popular AI tool.'
-  WHERE slug = 'gamma-app';
-UPDATE public.ai_tools SET description_hinglish = 'Story-style presentations aur pitch decks banane ke liye ek AI-assisted narrative platform.'
-  WHERE slug = 'tome-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Salesforce CRM mein built-in AI jo sales forecasting, customer intelligence aur automation provide karta hai.'
-  WHERE slug = 'salesforce-einstein';
-UPDATE public.ai_tools SET description_hinglish = 'HubSpot mein AI features jo marketing, sales aur customer service ko automate aur improve karte hain.'
-  WHERE slug = 'hubspot-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Zoho CRM aur business suite mein AI assistant jo sales forecasting aur customer analysis karta hai.'
-  WHERE slug = 'zoho-zia';
-
--- Education
-UPDATE public.ai_tools SET description_hinglish = 'Khan Academy ka AI tutor jo students ko maths, science aur doosre subjects personally sikhane mein help karta hai.'
-  WHERE slug = 'khanmigo';
-UPDATE public.ai_tools SET description_hinglish = 'Duolingo ka AI-powered premium experience jo language sikhna aur bhi fun aur effective banata hai.'
-  WHERE slug = 'duolingo-max';
-UPDATE public.ai_tools SET description_hinglish = 'Camera se maths ke sawaal scan karke step-by-step solution batane wala AI math solver.'
-  WHERE slug = 'photomath';
-UPDATE public.ai_tools SET description_hinglish = 'Complex maths, science aur engineering sawaalon ke jawab ke liye duniya ka sabse powerful computational knowledge engine.'
-  WHERE slug = 'wolfram-alpha';
-UPDATE public.ai_tools SET description_hinglish = 'Google ka ek free AI homework helper jo photo se sawaal pehchaan kar step-by-step jawab deta hai.'
-  WHERE slug = 'socratic';
-UPDATE public.ai_tools SET description_hinglish = 'Students ko homework, assignments aur exams ki taiyaar mein AI se help karne wala ek education platform.'
-  WHERE slug = 'chegg-ai';
-UPDATE public.ai_tools SET description_hinglish = 'Duniyabhar ke students aur experts ka ek Q&A platform jo ab AI-assisted answers deta hai.'
-  WHERE slug = 'brainly';
-UPDATE public.ai_tools SET description_hinglish = 'Indian students ke liye ek popular EdTech platform jo AI se personalized learning experience deta hai.'
-  WHERE slug = 'byju-ai';
-
--- ============================================================
 -- Verification
--- ============================================================
 SELECT
-  slug,
-  name_hinglish,
-  CASE WHEN description_hinglish IS NULL THEN 'MISSING' ELSE 'OK' END as hinglish_status
-FROM public.ai_tools
-ORDER BY slug;
+  'Total tools' AS metric, COUNT(*) AS count FROM public.ai_tools
+UNION ALL
+SELECT 'Has Hinglish name', COUNT(*) FROM public.ai_tools WHERE name_hinglish IS NOT NULL
+UNION ALL
+SELECT 'Has Hinglish description', COUNT(*) FROM public.ai_tools WHERE description_hinglish IS NOT NULL AND description_hinglish != description_en;

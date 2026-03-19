@@ -278,6 +278,28 @@ const translations = {
   },
 
   // ── Footer / Common ──────────────────────────────────────
+  footer_all_tools: { en: "All Tools", hi: "सभी टूल्स", hinglish: "All Tools" },
+  footer_sponsor: {
+    en: "Sponsor a Listing",
+    hi: "लिस्टिंग प्रायोजित करें",
+    hinglish: "Sponsor a Listing",
+  },
+  footer_legal: { en: "Legal", hi: "कानूनी", hinglish: "Legal" },
+  footer_privacy: {
+    en: "Privacy Policy",
+    hi: "गोपनीयता नीति",
+    hinglish: "Privacy Policy",
+  },
+  footer_terms: {
+    en: "Terms of Service",
+    hi: "सेवा की शर्तें",
+    hinglish: "Terms of Service",
+  },
+  footer_rights: {
+    en: "Aihkya Platform. All rights reserved.",
+    hi: "Aihkya प्लैटफ़ॉर्म। सर्वाधिकार सुरक्षित।",
+    hinglish: "Aihkya Platform. All rights reserved.",
+  },
   footer_tagline: {
     en: "India's Hindi-First AI Tool Directory",
     hi: "भारत की हिंदी-प्रथम AI टूल डायरेक्टरी",

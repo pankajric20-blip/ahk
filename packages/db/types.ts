@@ -14,11 +14,14 @@ export interface Database {
           id: string;
           name_en: string;
           name_hi: string | null;
+          name_hinglish: string | null;
           slug: string;
           tagline_en: string | null;
           tagline_hi: string | null;
+          tagline_hinglish: string | null;
           description_en: string | null;
           description_hi: string | null;
+          description_hinglish: string | null;
           website_url: string;
           logo_url: string | null;
           demo_video_url: string | null;
@@ -88,9 +91,11 @@ export interface Database {
           id: string;
           name_en: string;
           name_hi: string;
+          name_hinglish: string | null;
           slug: string;
           description_en: string | null;
           description_hi: string | null;
+          description_hinglish: string | null;
           icon: string | null;
           parent_id: string | null;
           level: number | null;

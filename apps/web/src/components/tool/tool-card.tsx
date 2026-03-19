@@ -14,10 +14,18 @@ interface ToolCardProps {
 }
 
 export function ToolCard({ tool }: ToolCardProps) {
-  const { t } = useLanguage();
+  const { t, ui } = useLanguage();
 
-  const displayName = t(tool.name_en, tool.name_hi);
-  const displayDesc = t(tool.description_en, tool.description_hi);
+  const displayName = t(
+    tool.name_en,
+    tool.name_hi,
+    (tool as any).name_hinglish,
+  );
+  const displayDesc = t(
+    tool.description_en,
+    tool.description_hi,
+    (tool as any).description_hinglish,
+  );
 
   return (
     <div className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full">
@@ -29,7 +37,7 @@ export function ToolCard({ tool }: ToolCardProps) {
           <div className="flex flex-col items-end gap-2 shrink-0">
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
               {tool.pricing_model === "free"
-                ? "Bilkull Free"
+                ? ui("common_bilkul_free")
                 : tool.pricing_model}
             </span>
             {tool.price_inr_monthly && (
@@ -77,12 +85,12 @@ export function ToolCard({ tool }: ToolCardProps) {
             <span className="text-sm font-medium mr-1">
               {tool.rating_avg && tool.rating_avg > 0
                 ? tool.rating_avg.toFixed(1)
-                : "New"}
+                : ui("tool_new")}
             </span>
             ★
           </div>
           <span className="text-sm font-medium text-primary flex items-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">
-            Details <ArrowRight className="ml-1 h-3 w-3" />
+            {ui("tool_details")} <ArrowRight className="ml-1 h-3 w-3" />
           </span>
         </div>
       </div>

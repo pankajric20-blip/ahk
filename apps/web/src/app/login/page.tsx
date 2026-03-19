@@ -19,6 +19,7 @@ function LoginForm() {
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function AuthForm() {
   const supabase = createBrowserClient(
@@ -29,6 +30,7 @@ function AuthForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const { theme } = useTheme();
 
   // Parse errors out of the URL (both search and hash)
   useEffect(() => {
@@ -175,7 +177,7 @@ function AuthForm() {
             anchor: "text-sm hover:underline",
           },
         }}
-        theme="dark" // We default to dark mode in layout.tsx
+        theme={theme} // Respect the user's saved theme preference
         providers={[]} // We handle Google explicitly above
         redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=${encodeURIComponent(next)}`}
       />

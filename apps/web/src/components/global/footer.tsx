@@ -40,7 +40,7 @@ export function Footer() {
                 href="/search?q="
                 className="hover:text-foreground transition-colors"
               >
-                All Tools
+                {ui("footer_all_tools")}
               </Link>
             </li>
           </ul>
@@ -62,21 +62,21 @@ export function Footer() {
                 href="/sponsor"
                 className="hover:text-foreground transition-colors"
               >
-                Sponsor a Listing
+                {ui("footer_sponsor")}
               </Link>
             </li>
           </ul>
         </div>
 
         <div className="space-y-4">
-          <h4 className="font-semibold">Legal</h4>
+          <h4 className="font-semibold">{ui("footer_legal")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
               <Link
                 href="/privacy"
                 className="hover:text-foreground transition-colors"
               >
-                Privacy Policy
+                {ui("footer_privacy")}
               </Link>
             </li>
             <li>
@@ -84,7 +84,7 @@ export function Footer() {
                 href="/terms"
                 className="hover:text-foreground transition-colors"
               >
-                Terms of Service
+                {ui("footer_terms")}
               </Link>
             </li>
           </ul>
@@ -93,8 +93,7 @@ export function Footer() {
 
       <div className="container mx-auto px-4 mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
         <p>
-          &copy; {new Date().getFullYear()} Aihkya Platform. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} {ui("footer_rights")}
         </p>
       </div>
     </footer>

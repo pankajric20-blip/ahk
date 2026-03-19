@@ -15,9 +15,11 @@ interface LanguageContextProps {
   language: LanguageType;
   setLanguage: (lang: LanguageType) => void;
   // Pick db content string based on language preference
+  // hinglishText is optional — falls back to enText if not provided
   t: (
     enText: string | null | undefined,
     hiText: string | null | undefined,
+    hinglishText?: string | null | undefined,
   ) => string;
   // Pick UI string from central translations dictionary
   ui: (key: TranslationKey) => string;
@@ -42,13 +44,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("user_language", lang);
   };
 
-  // For database bilingual content (name_en / name_hi)
+  // For database bilingual content (name_en / name_hi / description_hinglish)
   const t = (
     enText: string | null | undefined,
     hiText: string | null | undefined,
+    hinglishText?: string | null | undefined,
   ): string => {
     if (language === "hi") {
-      return hiText || enText || "";
+      // Only use Hindi text if it's actually different from English
+      // (guards against migration fallback that set name_hi = name_en)
+      const hi = hiText?.trim();
+      const en = enText?.trim();
+      return (hi && hi !== en ? hi : en) ?? "";
+    }
+    if (language === "hinglish") {
+      // Use hinglish if provided, otherwise fall back to English
+      return hinglishText?.trim() || enText || "";
     }
     return enText || hiText || "";
   };
