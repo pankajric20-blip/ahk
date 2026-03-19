@@ -32,16 +32,6 @@ function AuthForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { theme } = useTheme();
 
-  const [siteUrl, setSiteUrl] = useState(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  );
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSiteUrl(window.location.origin);
-    }
-  }, []);
-
   // Parse errors out of the URL (both search and hash)
   useEffect(() => {
     // e.g. /login?error=auth-callback-failed
@@ -84,7 +74,7 @@ function AuthForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -187,7 +177,7 @@ function AuthForm() {
         }}
         theme={theme} // Respect the user's saved theme preference
         providers={[]} // We handle Google explicitly above
-        redirectTo={`${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`}
+        redirectTo={`${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback?next=${encodeURIComponent(next)}`}
       />
     </div>
   );
