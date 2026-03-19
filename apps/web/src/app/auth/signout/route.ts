@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
  * Signs the user out and redirects to the home page.
  * Must be a POST to prevent CSRF via GET requests.
  */
-export async function POST() {
+export async function POST(request: Request) {
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,8 +17,6 @@ export async function POST() {
 
   await supabase.auth.signOut();
 
-  return NextResponse.redirect(
-    new URL("/", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-    { status: 302 },
-  );
+  const { origin } = new URL(request.url);
+  return NextResponse.redirect(new URL("/", origin), { status: 302 });
 }
