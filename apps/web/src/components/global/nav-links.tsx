@@ -26,18 +26,18 @@ export function NavLinks() {
 export function NavAuthButton({ isLoggedIn }: { isLoggedIn: boolean }) {
   const { ui } = useLanguage();
   return isLoggedIn ? (
-    <a
+    <Link
       href="/dashboard"
       className="hidden md:flex items-center justify-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
     >
       {ui("nav_dashboard")}
-    </a>
+    </Link>
   ) : (
-    <a
+    <Link
       href="/login"
       className="hidden md:flex items-center justify-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
     >
       {ui("nav_login")}
-    </a>
+    </Link>
   );
 }

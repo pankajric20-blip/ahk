@@ -25,16 +25,18 @@ export async function completeOnboarding(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
-  // Update profile
-  const { error } = await (supabase.from("profiles") as any)
-    .update({
+  // Update or insert profile
+  const { error } = await (supabase.from("profiles") as any).upsert(
+    {
+      id: user.id,
       preferred_language: language || null,
       user_type: userType || null,
       city: city || null,
       onboarding_completed: true,
       updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
+    },
+    { onConflict: "id" },
+  );
 
   if (error) {
     console.error("Failed to complete onboarding:", error);
