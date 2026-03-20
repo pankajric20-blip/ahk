@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";
@@ -11,6 +11,9 @@ import {
   HomeBadge,
 } from "@/components/global/localized-sections";
 
+// Cache the homepage for 5 minutes — re-render in background on next request
+export const revalidate = 300;
+
 export default async function Home() {
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -19,30 +22,46 @@ export default async function Home() {
     cookieStore,
   );
 
-  // Fetch featured/sponsored tools — fall back to top-rated published tools
-  let { data: featuredTools } = await supabase
+  // Single query: featured/sponsored first, fall back to top-rated — no N+1
+  const toolColumns = [
+    "id",
+    "name_en",
+    "name_hi",
+    "name_hinglish",
+    "slug",
+    "logo_url",
+    "pricing_model",
+    "price_inr_monthly",
+    "rating_avg",
+    "rating_count",
+    "description_en",
+    "description_hi",
+    "description_hinglish",
+    "tagline_en",
+    "tagline_hi",
+    "tagline_hinglish",
+    "made_in_india",
+    "upi_payment_accepted",
+    "gst_compliant",
+    "is_featured",
+    "is_sponsored",
+  ].join(", ");
+
+  const { data: featuredTools } = await supabase
     .from("ai_tools")
-    .select("*")
+    .select(toolColumns)
     .eq("status", "approved")
-    .or("is_featured.eq.true,is_sponsored.eq.true")
+    .order("is_featured", { ascending: false })
+    .order("is_sponsored", { ascending: false })
     .order("rating_avg", { ascending: false })
     .limit(6);
 
-  // Fallback: if no featured/sponsored tools, show highest-rated approved tools
-  if (!featuredTools || featuredTools.length === 0) {
-    const { data: topTools } = await supabase
-      .from("ai_tools")
-      .select("*")
-      .eq("status", "approved")
-      .order("rating_avg", { ascending: false })
-      .limit(6);
-    featuredTools = topTools;
-  }
-
-  // Fetch popular task categories
+  // Fetch popular task categories — only columns CategoryGrid needs
   const { data: categories } = await supabase
     .from("task_categories")
-    .select("*")
+    .select(
+      "id, name_en, name_hi, name_hinglish, slug, icon, tool_count, description_en, description_hi, description_hinglish",
+    )
     .eq("level", 0)
     .order("display_order", { ascending: true })
     .limit(8);

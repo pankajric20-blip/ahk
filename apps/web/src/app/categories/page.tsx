@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { PageHeader } from "@/components/global/page-header";
 import { CategoryList } from "@/components/global/category-list";
 
+export const revalidate = 3600; // categories rarely change — cache for 1 hour
+
 export const metadata = {
   title: "Browse AI Categories | Aihkya",
   description:
@@ -20,7 +22,9 @@ export default async function CategoriesPage() {
 
   const { data: categories } = await supabase
     .from("task_categories")
-    .select("*")
+    .select(
+      "id, name_en, name_hi, name_hinglish, slug, icon, tool_count, description_en, description_hi, description_hinglish, is_active, display_order",
+    )
     .order("display_order");
 
   return (
