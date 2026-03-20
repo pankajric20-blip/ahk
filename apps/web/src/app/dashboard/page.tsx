@@ -28,7 +28,7 @@ export default async function DashboardPage() {
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   // Fetch saved tools with details
   const { data: bookmarkRows } = await supabase

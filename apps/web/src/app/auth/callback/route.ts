@@ -43,9 +43,9 @@ export async function GET(request: Request) {
           .from("profiles")
           .select("onboarding_completed")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
-        if (profile && !(profile as any).onboarding_completed) {
+        if (!profile || !(profile as any).onboarding_completed) {
           // If a specific next parameter is provided (e.g. they were trying to save a tool),
           // pass it along to the onboarding so we can redirect them back afterward.
           const onboardingUrl = new URL("/onboarding", origin);

@@ -99,7 +99,7 @@ export default async function ToolDetailsPage({ params }: Props) {
           .select("tool_id")
           .eq("user_id", user.id)
           .eq("tool_id", tool.id)
-          .single()
+          .maybeSingle()
       : (Promise.resolve({ data: null }) as any),
     supabase
       .from("reviews")
