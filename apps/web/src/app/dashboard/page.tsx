@@ -2,17 +2,12 @@
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ToolCard } from "@/components/tool/tool-card";
-import {
-  DashboardHeader,
-  DashboardSidebar,
-  DashboardSavedTitle,
-  DashboardEmptyState,
-} from "./dashboard-content";
+import type { Metadata } from "next";
+import { DashboardClient } from "./dashboard-client";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Dashboard | Aihkya",
-  description: "Manage your saved tools and reviews.",
+  description: "Manage your saved tools, reviews, and account settings.",
 };
 
 export default async function DashboardPage() {
@@ -28,63 +23,97 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Fetch profile
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  const { data: bookmarkRows, error: bookmarkError } = await supabase
+  // Fetch saved tools with details
+  const { data: bookmarkRows } = await supabase
     .from("saved_tools")
     .select("tool_id, created_at")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (bookmarkError)
-    console.error(
-      "[Dashboard] saved_tools fetch error:",
-      bookmarkError.message,
-    );
+    .order("created_at", { ascending: false })
+    .limit(6);
 
   let savedTools: any[] = [];
   if (bookmarkRows && bookmarkRows.length > 0) {
     const toolIds = bookmarkRows.map((b: any) => b.tool_id);
-    const { data: toolData, error: toolError } = await supabase
+    const { data: toolData } = await supabase
       .from("ai_tools")
-      .select("*")
+      .select(
+        "id, name_en, name_hi, name_hinglish, slug, logo_url, pricing_model, rating_avg, rating_count, tagline_en, tagline_hi, tagline_hinglish, made_in_india, is_featured",
+      )
       .in("id", toolIds);
-    if (toolError) {
-      console.error("[Dashboard] ai_tools fetch error:", toolError.message);
-    } else if (toolData) {
+    if (toolData) {
       const toolMap = new Map((toolData as any[]).map((t) => [t.id, t]));
       savedTools = toolIds.map((id: string) => toolMap.get(id)).filter(Boolean);
     }
   }
 
-  const displayName = (profile as any)?.display_name
-    ? `Welcome back, ${(profile as any).display_name}`
-    : `Welcome back, ${user.email}`;
+  // Fetch user reviews
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("id, tool_id, rating, title, review_text, created_at, status")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  // Fetch tool names for reviews
+  let reviewsWithTools: any[] = [];
+  if (reviews && reviews.length > 0) {
+    const reviewToolIds = [...new Set(reviews.map((r: any) => r.tool_id))];
+    const { data: reviewTools } = await supabase
+      .from("ai_tools")
+      .select("id, name_en, slug, logo_url")
+      .in("id", reviewToolIds);
+    const toolMap = new Map((reviewTools || []).map((t: any) => [t.id, t]));
+    reviewsWithTools = reviews.map((r: any) => ({
+      ...r,
+      tool: toolMap.get(r.tool_id),
+    }));
+  }
+
+  // Stats
+  const totalSaved = (profile as any)?.tools_saved ?? bookmarkRows?.length ?? 0;
+  const totalReviews = (profile as any)?.tools_reviewed ?? reviews?.length ?? 0;
+  const karmaScore = (profile as any)?.karma_score ?? 0;
+  const helpfulVotes = (profile as any)?.helpful_votes_received ?? 0;
+
+  const displayName =
+    (profile as any)?.display_name || user.email?.split("@")[0] || "User";
+
+  const memberSince = user.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+      })
+    : null;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl min-h-[80vh]">
-      <DashboardHeader displayName={displayName} />
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <DashboardSidebar />
-
-        <div className="col-span-1 md:col-span-3 border rounded-xl bg-card p-6 min-h-[400px]">
-          <DashboardSavedTitle />
-          {savedTools.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {savedTools.map((tool: any) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
-          ) : (
-            <DashboardEmptyState />
-          )}
-        </div>
-      </div>
-    </div>
+    <DashboardClient
+      user={{
+        id: user.id,
+        email: user.email ?? "",
+        avatar_url: (profile as any)?.avatar_url ?? null,
+        display_name: displayName,
+        user_type: (profile as any)?.user_type ?? null,
+        city: (profile as any)?.city ?? null,
+        state: (profile as any)?.state ?? null,
+        business_name: (profile as any)?.business_name ?? null,
+        is_ai_champion: (profile as any)?.is_ai_champion ?? false,
+        member_since: memberSince,
+      }}
+      stats={{
+        saved: totalSaved,
+        reviews: totalReviews,
+        karma: karmaScore,
+        helpful_votes: helpfulVotes,
+      }}
+      savedTools={savedTools}
+      reviews={reviewsWithTools}
+    />
   );
 }

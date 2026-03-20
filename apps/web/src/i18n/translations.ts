@@ -219,6 +219,168 @@ const translations = {
     hinglish: "Tools Dhundho",
   },
 
+  // ── Dashboard — Profile & Stats ───────────────────────────
+  dashboard_your_activity: {
+    en: "Your Activity",
+    hi: "आपकी गतिविधि",
+    hinglish: "Aapki Activity",
+  },
+  dashboard_stat_saved: {
+    en: "Tools Saved",
+    hi: "सेव किए टूल्स",
+    hinglish: "Saved Tools",
+  },
+  dashboard_stat_reviews: {
+    en: "Reviews Written",
+    hi: "लिखी गई समीक्षाएं",
+    hinglish: "Reviews Likhe",
+  },
+  dashboard_stat_karma: {
+    en: "Karma Score",
+    hi: "कर्मा स्कोर",
+    hinglish: "Karma Score",
+  },
+  dashboard_stat_helpful: {
+    en: "Helpful Votes",
+    hi: "सहायक वोट",
+    hinglish: "Helpful Votes",
+  },
+  dashboard_sign_out: {
+    en: "Sign Out",
+    hi: "साइन आउट",
+    hinglish: "Sign Out Karo",
+  },
+
+  // ── Dashboard — Quick Actions ─────────────────────────────
+  dashboard_quick_actions: {
+    en: "Quick Actions",
+    hi: "त्वरित क्रियाएं",
+    hinglish: "Quick Actions",
+  },
+  dashboard_explore_tools: {
+    en: "Explore Tools",
+    hi: "टूल्स खोजें",
+    hinglish: "Tools Explore Karo",
+  },
+  dashboard_browse_categories: {
+    en: "Browse Categories",
+    hi: "श्रेणियां देखें",
+    hinglish: "Categories Dekho",
+  },
+  dashboard_submit_tool: {
+    en: "Submit a Tool",
+    hi: "टूल जोड़ें",
+    hinglish: "Tool Submit Karo",
+  },
+  dashboard_free_tools: {
+    en: "Free Tools",
+    hi: "मुफ़्त टूल्स",
+    hinglish: "Free Tools",
+  },
+
+  // ── Dashboard — Trending Card ─────────────────────────────
+  dashboard_trending_now: {
+    en: "Trending Now",
+    hi: "अभी ट्रेंडिंग",
+    hinglish: "Abhi Trending",
+  },
+  dashboard_trending_desc: {
+    en: "Discover the hottest AI tools being used across India right now.",
+    hi: "अभी पूरे भारत में उपयोग किए जा रहे सबसे लोकप्रिय AI टूल्स खोजें।",
+    hinglish: "Abhi India mein sabse zyada use ho rahe AI tools dekho.",
+  },
+  dashboard_see_trending: {
+    en: "See trending",
+    hi: "ट्रेंडिंग देखें",
+    hinglish: "Trending Dekho",
+  },
+
+  // ── Dashboard — Tabs ──────────────────────────────────────
+  dashboard_tab_saved: {
+    en: "Saved Tools",
+    hi: "सेव किए टूल्स",
+    hinglish: "Saved Tools",
+  },
+  dashboard_tab_reviews: {
+    en: "My Reviews",
+    hi: "मेरी समीक्षाएं",
+    hinglish: "Meri Reviews",
+  },
+
+  // ── Dashboard — Saved Tools Panel ────────────────────────
+  dashboard_saved_empty_title: {
+    en: "No saved tools yet",
+    hi: "अभी तक कोई सेव किया टूल नहीं",
+    hinglish: "Abhi tak koi saved tool nahi",
+  },
+  dashboard_saved_empty_desc: {
+    en: "Start exploring and save AI tools that interest you. They'll appear here.",
+    hi: "AI टूल्स खोजें और जो पसंद आए उन्हें सेव करें। वे यहां दिखेंगे।",
+    hinglish: "AI tools explore karo aur jo pasand aaye unhe save karo.",
+  },
+  dashboard_explore_ai_tools: {
+    en: "Explore AI Tools",
+    hi: "AI टूल्स खोजें",
+    hinglish: "AI Tools Explore Karo",
+  },
+  dashboard_showing_of: {
+    en: "Showing 6 of {n} saved tools",
+    hi: "{n} सेव किए टूल्स में से 6 दिखाए जा रहे हैं",
+    hinglish: "{n} saved tools mein se 6 dikh rahe hain",
+  },
+
+  // ── Dashboard — Reviews Panel ─────────────────────────────
+  dashboard_reviews_empty_title: {
+    en: "No reviews yet",
+    hi: "अभी तक कोई समीक्षा नहीं",
+    hinglish: "Abhi tak koi review nahi",
+  },
+  dashboard_reviews_empty_desc: {
+    en: "Share your experience with AI tools. Your review helps others in the community.",
+    hi: "AI टूल्स के साथ अपना अनुभव साझा करें। आपकी समीक्षा समुदाय की मदद करती है।",
+    hinglish:
+      "AI tools ke baare mein apna experience share karo. Teri review community ki madad karti hai.",
+  },
+  dashboard_find_tools_to_review: {
+    en: "Find Tools to Review",
+    hi: "समीक्षा के लिए टूल्स खोजें",
+    hinglish: "Review Karne ke liye Tools Dhundho",
+  },
+
+  // ── Dashboard — Badge Labels ──────────────────────────────
+  dashboard_badge_india: {
+    en: "India",
+    hi: "भारत",
+    hinglish: "India",
+  },
+  dashboard_badge_featured: {
+    en: "Featured",
+    hi: "चुनिंदा",
+    hinglish: "Featured",
+  },
+  dashboard_badge_champion: {
+    en: "AI Champion",
+    hi: "AI चैम्पियन",
+    hinglish: "AI Champion",
+  },
+
+  // ── Dashboard — Review Status Labels ──────────────────────
+  dashboard_status_published: {
+    en: "Published",
+    hi: "प्रकाशित",
+    hinglish: "Published",
+  },
+  dashboard_status_pending: {
+    en: "Pending",
+    hi: "लंबित",
+    hinglish: "Pending",
+  },
+  dashboard_status_flagged: {
+    en: "Flagged",
+    hi: "फ्लैग किया",
+    hinglish: "Flagged",
+  },
+
   // ── Submit Tool ─────────────────────────────────────────
   new_title: {
     en: "Submit a Tool",
