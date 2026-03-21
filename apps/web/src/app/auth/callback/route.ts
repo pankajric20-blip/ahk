@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
-import { createServerClient } from "@aihkya/db";
-import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
@@ -12,32 +11,58 @@ export async function GET(request: Request) {
   let next = "/dashboard";
   try {
     const parsedNext = new URL(nextParam, origin);
-    // Only allow same-origin redirects
     if (parsedNext.origin === origin) {
       next = parsedNext.pathname + parsedNext.search;
     }
   } catch {
-    // nextParam is a relative path (e.g. "/dashboard") — safe to use directly
     if (nextParam.startsWith("/") && !nextParam.startsWith("//")) {
       next = nextParam;
     }
   }
 
   if (code) {
-    const cookieStore = await cookies();
+    // Collect cookies set during exchangeCodeForSession so we can attach them
+    // directly to the redirect response. Using next/headers + NextResponse.redirect()
+    // does NOT reliably forward Set-Cookie headers — the browser never receives the
+    // session tokens and the middleware keeps bouncing the user to /login.
+    const cookiesToSet: {
+      name: string;
+      value: string;
+      options: Record<string, unknown>;
+    }[] = [];
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      cookieStore,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(incoming) {
+            // Accumulate — we'll apply them to the redirect response below.
+            incoming.forEach((c) =>
+              cookiesToSet.push({
+                name: c.name,
+                value: c.value,
+                options: (c.options ?? {}) as Record<string, unknown>,
+              }),
+            );
+          },
+        },
+      },
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Check if onboarding is completed
+      // Determine where to redirect
+      let redirectUrl = `${origin}${next}`;
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
@@ -46,20 +71,22 @@ export async function GET(request: Request) {
           .maybeSingle();
 
         if (!profile || !(profile as any).onboarding_completed) {
-          // If a specific next parameter is provided (e.g. they were trying to save a tool),
-          // pass it along to the onboarding so we can redirect them back afterward.
           const onboardingUrl = new URL("/onboarding", origin);
           if (nextParam && nextParam !== "/dashboard") {
             onboardingUrl.searchParams.set("next", nextParam);
           }
-          return NextResponse.redirect(onboardingUrl.toString());
+          redirectUrl = onboardingUrl.toString();
         }
       }
 
-      return NextResponse.redirect(`${origin}${next}`);
+      // Build the redirect and attach all session cookies directly to it.
+      const response = NextResponse.redirect(redirectUrl);
+      cookiesToSet.forEach(({ name, value, options }) =>
+        response.cookies.set(name, value, options as any),
+      );
+      return response;
     }
   }
 
-  // Return the user to an error page; do not expose internal error details
   return NextResponse.redirect(`${origin}/login?error=auth-callback-failed`);
 }
