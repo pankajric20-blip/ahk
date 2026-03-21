@@ -6,7 +6,7 @@ import { toggleBookmark } from "@/app/actions/bookmark";
 import { useRouter } from "next/navigation";
 
 interface BookmarkButtonProps {
-  toolId: number;
+  toolId: string;
   initialBookmarked: boolean;
   slug: string;
 }

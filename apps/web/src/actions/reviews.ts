@@ -18,6 +18,10 @@ export async function submitReview(formData: FormData) {
     return { error: "Invalid rating" };
   }
 
+  if (!reviewText?.trim()) {
+    return { error: "Please write a review before submitting." };
+  }
+
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

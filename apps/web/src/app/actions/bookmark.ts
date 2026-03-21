@@ -9,11 +9,11 @@ import { cookies } from "next/headers";
  *
  * Security notes:
  * - Authentication is always verified server-side via supabase.auth.getUser().
- * - toolId is coerced to a number to prevent injection; Supabase parameterises queries.
+ * - toolId is validated as a UUID to prevent injection; Supabase parameterises queries.
  * - pathToRevalidate is validated to be a well-formed relative path before use.
  * - Generic error messages are returned to the client (never raw DB errors).
  */
-export async function toggleBookmark(toolId: number, pathToRevalidate: string) {
+export async function toggleBookmark(toolId: string, pathToRevalidate: string) {
   // Validate the revalidation path is a safe relative path
   const safePath =
     typeof pathToRevalidate === "string" &&
@@ -37,26 +37,26 @@ export async function toggleBookmark(toolId: number, pathToRevalidate: string) {
     return { error: "You must be logged in to bookmark a tool." };
   }
 
-  // Ensure toolId is a valid integer to prevent abuse
-  const safeToolId = Math.trunc(Number(toolId));
-  if (!Number.isFinite(safeToolId) || safeToolId <= 0) {
+  // Validate toolId is a non-empty string (UUID)
+  if (!toolId || typeof toolId !== "string" || toolId.trim() === "") {
     return { error: "Invalid tool." };
   }
+  const safeToolId = toolId.trim();
 
   // Check if bookmark already exists (RLS on DB ensures this is scoped to user)
   const { data: existingData } = await supabase
-    .from("bookmarks")
-    .select("id")
+    .from("saved_tools")
+    .select("tool_id")
     .eq("user_id", user.id)
     .eq("tool_id", safeToolId)
-    .single();
-  const existingBookmark = existingData as { id: string } | null;
+    .maybeSingle();
 
-  if (existingBookmark) {
+  if (existingData) {
     const { error: removeError } = await supabase
-      .from("bookmarks")
+      .from("saved_tools")
       .delete()
-      .eq("id", existingBookmark.id);
+      .eq("user_id", user.id)
+      .eq("tool_id", safeToolId);
 
     if (removeError) {
       // Log server-side only — do NOT expose DB error to client
@@ -65,7 +65,7 @@ export async function toggleBookmark(toolId: number, pathToRevalidate: string) {
     }
   } else {
     const { error: insertError } = await supabase
-      .from("bookmarks")
+      .from("saved_tools")
       .insert({ user_id: user.id, tool_id: safeToolId } as any);
 
     if (insertError) {
@@ -77,5 +77,5 @@ export async function toggleBookmark(toolId: number, pathToRevalidate: string) {
   revalidatePath(safePath);
   revalidatePath("/dashboard");
 
-  return { success: true, isBookmarked: !existingBookmark };
+  return { success: true, isBookmarked: !existingData };
 }
