@@ -83,7 +83,7 @@ export default async function DashboardPage() {
   const helpfulVotes = (profile as any)?.helpful_votes_received ?? 0;
 
   const displayName =
-    (profile as any)?.display_name || user.email?.split("@")[0] || "User";
+    (profile as any)?.display_name || user.email?.split("@")?.[0] || "User";
 
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString("en-IN", {
