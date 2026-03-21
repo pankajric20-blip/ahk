@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient } from "@aihkya/db";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -25,11 +25,8 @@ export async function GET(request: NextRequest) {
     // directly to the redirect response. Using next/headers + NextResponse.redirect()
     // does NOT reliably forward Set-Cookie headers — the browser never receives the
     // session tokens and the middleware keeps bouncing the user to /login.
-    const cookiesToSet: {
-      name: string;
-      value: string;
-      options: Record<string, unknown>;
-    }[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cookiesToSet: { name: string; value: string; options: any }[] = [];
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,13 +36,14 @@ export async function GET(request: NextRequest) {
           getAll() {
             return request.cookies.getAll();
           },
-          setAll(incoming) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setAll(incoming: any[]) {
             // Accumulate — we'll apply them to the redirect response below.
             incoming.forEach((c) =>
               cookiesToSet.push({
                 name: c.name,
                 value: c.value,
-                options: (c.options ?? {}) as Record<string, unknown>,
+                options: c.options ?? {},
               }),
             );
           },
@@ -82,7 +80,7 @@ export async function GET(request: NextRequest) {
       // Build the redirect and attach all session cookies directly to it.
       const response = NextResponse.redirect(redirectUrl);
       cookiesToSet.forEach(({ name, value, options }) =>
-        response.cookies.set(name, value, options as any),
+        response.cookies.set(name, value, options),
       );
       return response;
     }
