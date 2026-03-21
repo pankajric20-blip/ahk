@@ -38,12 +38,12 @@ export default function RootLayout({
   try {
     var t = localStorage.getItem('user_theme');
     var root = document.documentElement;
-    if (t === 'light') {
-      root.classList.remove('dark');
-      root.classList.add('light');
-    } else {
+    if (t === 'dark') {
       root.classList.remove('light');
       root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
     }
   } catch(e) {}
 })();

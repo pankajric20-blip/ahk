@@ -19,11 +19,11 @@ interface ThemeContextProps {
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeType>("dark");
+  const [theme, setThemeState] = useState<ThemeType>("light");
 
   useEffect(() => {
     const saved = localStorage.getItem("user_theme") as ThemeType | null;
-    const initial = saved === "light" || saved === "dark" ? saved : "dark";
+    const initial = saved === "light" || saved === "dark" ? saved : "light";
     setThemeState(initial);
     applyTheme(initial);
   }, []);
