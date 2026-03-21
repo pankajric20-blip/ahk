@@ -28,27 +28,23 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cookiesToSet: { name: string; value: string; options: any }[] = [];
 
+    // Custom cookie store: reads from the incoming request and accumulates writes
+    // so we can forward them directly onto the redirect response below.
+    // @aihkya/db's createServerClient calls store.set() for each cookie Supabase wants
+    // to persist, so we collect them here instead of writing to next/headers.
+    const cookieStore = {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      set(name: string, value: string, options?: Record<string, unknown>) {
+        cookiesToSet.push({ name, value, options });
+      },
+    };
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setAll(incoming: any[]) {
-            // Accumulate — we'll apply them to the redirect response below.
-            incoming.forEach((c) =>
-              cookiesToSet.push({
-                name: c.name,
-                value: c.value,
-                options: c.options ?? {},
-              }),
-            );
-          },
-        },
-      },
+      cookieStore,
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
