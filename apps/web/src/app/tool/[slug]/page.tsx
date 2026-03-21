@@ -16,6 +16,12 @@ import {
   ToolCategoryBadge,
   ToolSidebar,
   ReviewsSectionTitle,
+  ToolHindiSummary,
+  ToolFeatures,
+  ToolProscons,
+  ToolUseCases,
+  ToolAlternatives,
+  ToolScreenshot,
 } from "./tool-content";
 import { cache } from "react";
 import { getLoggedInUser } from "@/components/global/navbar";
@@ -51,7 +57,8 @@ const fetchTool = cache(async (slug: string) => {
         "made_in_india, supports_hindi, mobile_friendly, works_offline, " +
         "upi_payment_accepted, gst_compliant, whatsapp_integration, " +
         "access_type, platform, api_available, is_verified, is_featured, " +
-        "demo_video_url, is_sponsored",
+        "demo_video_url, is_sponsored, screenshot_url, " +
+        "features, pros, cons, use_cases, alternatives, hindi_summary",
     )
     .eq("slug", slug)
     .single();
@@ -60,7 +67,6 @@ const fetchTool = cache(async (slug: string) => {
 
 export async function generateMetadata({ params }: Props) {
   const p = await params;
-  // Reuses the cached fetchTool — no extra DB query
   const tool = await fetchTool(p.slug);
   if (!tool) return { title: "Tool Not Found - Aihkya" };
   return {
@@ -72,11 +78,10 @@ export async function generateMetadata({ params }: Props) {
 export default async function ToolDetailsPage({ params }: Props) {
   const p = await params;
 
-  // Both calls are deduplicated by React cache — only 1 DB round-trip each
   const tool = await fetchTool(p.slug);
   if (!tool) notFound();
 
-  const user = await getLoggedInUser(); // deduplicated with Navbar's call
+  const user = await getLoggedInUser();
 
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -85,39 +90,58 @@ export default async function ToolDetailsPage({ params }: Props) {
     cookieStore,
   );
 
-  // Fetch category + bookmark + reviews in parallel for max speed
-  const [catResult, bookmarkResult, reviewsResult] = await Promise.all([
-    supabase
-      .from("tool_tasks")
-      .select("task_categories(name_en, name_hi, slug)")
-      .eq("tool_id", tool.id)
-      .limit(1)
-      .single(),
-    user
-      ? supabase
-          .from("saved_tools")
-          .select("tool_id")
-          .eq("user_id", user.id)
-          .eq("tool_id", tool.id)
-          .maybeSingle()
-      : (Promise.resolve({ data: null }) as any),
-    supabase
-      .from("reviews")
-      .select(
-        `id, rating, title, review_text, use_case, usage_duration, created_at, user_id, user:profiles(display_name, avatar_url)`,
-      )
-      .eq("tool_id", tool.id)
-      .order("created_at", { ascending: false }),
-  ]);
+  // Build alternatives slug list
+  const alternativeSlugs: string[] = Array.isArray(tool.alternatives)
+    ? tool.alternatives.filter(Boolean)
+    : [];
+
+  // Fetch category, bookmark, reviews, and alternative tools in parallel
+  const [catResult, bookmarkResult, reviewsResult, altResult] =
+    await Promise.all([
+      supabase
+        .from("tool_tasks")
+        .select("task_categories(name_en, name_hi, slug)")
+        .eq("tool_id", tool.id)
+        .limit(1)
+        .single(),
+
+      user
+        ? supabase
+            .from("saved_tools")
+            .select("tool_id")
+            .eq("user_id", user.id)
+            .eq("tool_id", tool.id)
+            .maybeSingle()
+        : (Promise.resolve({ data: null }) as any),
+
+      supabase
+        .from("reviews")
+        .select(
+          "id, rating, title, review_text, use_case, usage_duration, created_at, user_id, user:profiles(display_name, avatar_url)",
+        )
+        .eq("tool_id", tool.id)
+        .order("created_at", { ascending: false }),
+
+      alternativeSlugs.length > 0
+        ? supabase
+            .from("ai_tools")
+            .select(
+              "id, slug, name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, logo_url, pricing_model, rating_avg",
+            )
+            .in("slug", alternativeSlugs)
+            .eq("status", "approved")
+        : (Promise.resolve({ data: [] }) as any),
+    ]);
 
   let toolCategory: any = null;
-  if ((catResult as any).data && (catResult as any).data.task_categories) {
+  if ((catResult as any).data?.task_categories) {
     toolCategory = (catResult as any).data.task_categories;
   }
 
   const initialBookmarked = !!bookmarkResult.data;
-
   const reviews: any[] = (reviewsResult.data as any[]) || [];
+  const alternativeTools: any[] = (altResult.data as any[]) || [];
+
   let currentUserReview: any = null;
   if (user) {
     currentUserReview = reviews.find((r: any) => r.user_id === user.id) || null;
@@ -128,22 +152,23 @@ export default async function ToolDetailsPage({ params }: Props) {
       <ToolDetailBackLink />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Main Content */}
+        {/* ── Main Content ── */}
         <div className="col-span-1 md:col-span-2 space-y-8">
           {/* Header */}
           <div className="flex items-start gap-6">
             <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center border shrink-0 overflow-hidden">
               <ToolLogo logoUrl={tool.logo_url} name={tool.name_en} size="lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-3 mb-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold">
                   <ToolName tool={tool} />
                 </h1>
                 {tool.status === "approved" && (
-                  <CheckCircle2 className="h-5 w-5 text-blue-500" />
+                  <CheckCircle2 className="h-5 w-5 text-blue-500 shrink-0" />
                 )}
               </div>
+
               {/* Rating */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center text-amber-500 font-semibold gap-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 text-sm">
@@ -156,10 +181,12 @@ export default async function ToolDetailsPage({ params }: Props) {
                   </span>
                 )}
               </div>
-              {/* Short description — language-reactive */}
+
+              {/* Tagline / Short description — shown ONCE here under the header */}
               <p className="text-lg text-muted-foreground mb-4">
                 <ToolShortDescription tool={tool} />
               </p>
+
               <div className="flex flex-wrap gap-2">
                 <ToolCategoryBadge toolCategory={toolCategory} />
                 {tool.made_in_india && (
@@ -171,18 +198,33 @@ export default async function ToolDetailsPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Tutorial Video */}
-          <YoutubeTutorialWidget
-            url={
-              tool.demo_video_url ||
-              `https://www.youtube.com/results?search_query=${encodeURIComponent(
-                tool.name_en + " hindi tutorial",
-              )}`
-            }
-          />
+          {/* Screenshot — only when available */}
+          <ToolScreenshot tool={tool} />
 
-          {/* Full About section — language-reactive */}
+          {/* Tutorial video — only when demo_video_url is set */}
+          {tool.demo_video_url && (
+            <YoutubeTutorialWidget url={tool.demo_video_url} />
+          )}
+
+          {/* Hindi Summary — highlighted card for Indian users */}
+          <ToolHindiSummary tool={tool} />
+
+          {/* About — full description, shown exactly once */}
           <ToolDescription tool={tool} />
+
+          {/* Key Features */}
+          <ToolFeatures tool={tool} />
+
+          {/* Pros & Cons */}
+          <ToolProscons tool={tool} />
+
+          {/* Use Cases */}
+          <ToolUseCases tool={tool} />
+
+          {/* Alternative Tools */}
+          {alternativeTools.length > 0 && (
+            <ToolAlternatives tools={alternativeTools} />
+          )}
 
           {/* Reviews */}
           <div className="pt-8 border-t mt-8">
@@ -211,7 +253,7 @@ export default async function ToolDetailsPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* ── Sidebar ── */}
         <div className="col-span-1 border-t md:border-t-0 md:border-l pt-8 md:pt-0 md:pl-8 space-y-6">
           <ToolSidebar tool={tool} />
           <BookmarkButton

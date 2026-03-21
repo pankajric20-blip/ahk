@@ -1,29 +1,27 @@
+"use client";
+
 import { PlayCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
-  url?: string | null;
+  url: string;
 }
 
 export function YoutubeTutorialWidget({ url }: Props) {
-  if (!url) return null;
+  const { ui } = useLanguage();
 
   let embedUrl = "";
-  let isSearch = false;
 
   try {
     const parsedUrl = new URL(url);
 
-    // Handle youtube.com/results?search_query=...
     if (
       parsedUrl.pathname === "/results" &&
       parsedUrl.searchParams.has("search_query")
     ) {
-      const query = parsedUrl.searchParams.get("search_query") || "";
-      const encodedQuery = encodeURIComponent(query);
-      embedUrl = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}`;
-      isSearch = true;
+      // Search-based URL — we no longer use this as a fallback
+      return null;
     } else {
-      // Handle standard video URLs
       const regExp =
         /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = url.match(regExp);
@@ -32,14 +30,12 @@ export function YoutubeTutorialWidget({ url }: Props) {
         embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
       }
     }
-  } catch (e) {
-    // If URL parsing fails, we could try the regex as fallback or just return null
+  } catch {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     if (match && match[2].length === 11) {
-      const videoId = match[2];
-      embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+      embedUrl = `https://www.youtube.com/embed/${match[2]}?rel=0`;
     }
   }
 
@@ -47,13 +43,9 @@ export function YoutubeTutorialWidget({ url }: Props) {
 
   return (
     <div className="rounded-xl overflow-hidden border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-muted p-4 border-b flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <PlayCircle className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-foreground">
-            {isSearch ? "Related Tutorials" : "Hindi Tutorial"}
-          </h3>
-        </div>
+      <div className="bg-muted p-4 border-b flex items-center gap-2">
+        <PlayCircle className="h-5 w-5 text-primary" />
+        <h3 className="font-semibold text-foreground">{ui("tool_tutorial")}</h3>
       </div>
       <div className="aspect-video w-full bg-black">
         <iframe

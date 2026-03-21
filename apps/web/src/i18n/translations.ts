@@ -159,6 +159,43 @@ const translations = {
     hinglish: "Related Tutorials",
   },
   tool_about_prefix: { en: "About", hi: "के बारे में", hinglish: "About" },
+  tool_features: {
+    en: "Key Features",
+    hi: "मुख्य फीचर्स",
+    hinglish: "Key Features",
+  },
+  tool_pros: { en: "Pros", hi: "फायदे", hinglish: "Fayde" },
+  tool_cons: { en: "Cons", hi: "नुकसान", hinglish: "Nuksaan" },
+  tool_pros_cons: {
+    en: "Pros & Cons",
+    hi: "फायदे और नुकसान",
+    hinglish: "Fayde aur Nuksaan",
+  },
+  tool_use_cases: {
+    en: "Who Is It For?",
+    hi: "यह टूल किसके लिए है?",
+    hinglish: "Yeh Tool Kiske Liye Hai?",
+  },
+  tool_hindi_summary: {
+    en: "For Indian Users",
+    hi: "भारतीय यूज़र्स के लिए",
+    hinglish: "Indian Users ke Liye",
+  },
+  tool_alternatives: {
+    en: "Explore Alternatives",
+    hi: "विकल्प देखें",
+    hinglish: "Alternatives Dekho",
+  },
+  tool_screenshot: {
+    en: "Screenshot",
+    hi: "स्क्रीनशॉट",
+    hinglish: "Screenshot",
+  },
+  tool_no_alternatives: {
+    en: "No alternatives listed yet.",
+    hi: "अभी कोई विकल्प नहीं है।",
+    hinglish: "Abhi koi alternative nahi hai.",
+  },
 
   // ── Search Page ──────────────────────────────────────────
   search_title: {
