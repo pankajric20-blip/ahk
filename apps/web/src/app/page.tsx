@@ -10,7 +10,7 @@ import {
   HomeSearchBar,
   HomeBadge,
 } from "@/components/global/localized-sections";
-import { getLocale } from "@/lib/get-locale";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 // Cache the homepage for 5 minutes — re-render in background on next request
 export const revalidate = 300;
@@ -23,19 +23,22 @@ export default async function Home() {
     cookieStore,
   );
 
-  // Single query against the lean list view — one locale, no heavy JSONB columns
-  const { data: featuredTools } = await supabase
-    .from("ai_tools_list")
+  // Fetch featured tools with all locale columns, then localize server-side
+  const { data: rawFeatured } = await supabase
+    .from("ai_tools")
     .select(
       "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
-        "name, tagline, made_in_india, upi_payment_accepted, gst_compliant, is_featured, is_sponsored",
+        "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+        "description_en, description_hi, description_hinglish, " +
+        "made_in_india, upi_payment_accepted, gst_compliant, is_featured, is_sponsored",
     )
     .eq("status", "approved")
-    .eq("locale", locale)
     .order("is_featured", { ascending: false })
     .order("is_sponsored", { ascending: false })
     .order("rating_avg", { ascending: false })
     .limit(6);
+
+  const featuredTools = localizeTools(rawFeatured ?? [], locale);
 
   // Fetch popular task categories — only columns CategoryGrid needs
   const { data: categories } = await supabase

@@ -3,7 +3,7 @@ import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";
 import { BackButton } from "@/components/global/back-button";
-import { getLocale } from "@/lib/get-locale";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 export const metadata = {
   title: "Free AI Tools | Aihkya",
@@ -19,18 +19,19 @@ export default async function FreeToolsPage() {
     cookieStore,
   );
 
-  const { data: freeTools } = await supabase
-    .from("ai_tools_list")
+  const { data: rawTools } = await supabase
+    .from("ai_tools")
     .select(
       "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
-        "name, tagline, made_in_india, upi_payment_accepted, gst_compliant",
+        "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+        "description_en, description_hi, description_hinglish, " +
+        "made_in_india, upi_payment_accepted, gst_compliant",
     )
     .eq("status", "approved")
-    .eq("locale", locale)
     .in("pricing_model", ["free", "freemium", "free_trial"])
     .order("rating_avg", { ascending: false });
 
-  const tools = freeTools ?? [];
+  const tools = localizeTools(rawTools ?? [], locale);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl min-h-[60vh]">

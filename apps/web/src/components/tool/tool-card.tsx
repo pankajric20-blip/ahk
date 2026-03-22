@@ -18,6 +18,7 @@ export interface LocalizedTool {
   rating_count?: number | null;
   name: string;
   tagline?: string | null;
+  description?: string | null;
   made_in_india?: boolean | null;
   upi_payment_accepted?: boolean | null;
   gst_compliant?: boolean | null;
@@ -61,7 +62,7 @@ export function ToolCard({ tool }: ToolCardProps) {
         </h3>
 
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
-          {tool.tagline}
+          {tool.tagline || tool.description}
         </p>
 
         {/* Indian Context Badges */}

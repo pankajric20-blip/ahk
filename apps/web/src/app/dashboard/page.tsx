@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { DashboardClient } from "./dashboard-client";
-import { getLocale } from "@/lib/get-locale";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 export const metadata: Metadata = {
   title: "Dashboard | Aihkya",
@@ -45,14 +45,16 @@ export default async function DashboardPage() {
   if (bookmarkRows && bookmarkRows.length > 0) {
     const toolIds = bookmarkRows.map((b: any) => b.tool_id);
     const { data: toolData } = await supabase
-      .from("ai_tools_list")
+      .from("ai_tools")
       .select(
-        "id, slug, logo_url, pricing_model, rating_avg, rating_count, name, tagline, made_in_india",
+        "id, slug, logo_url, pricing_model, rating_avg, rating_count, made_in_india, " +
+          "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+          "description_en, description_hi, description_hinglish",
       )
-      .in("id", toolIds)
-      .eq("locale", locale);
+      .in("id", toolIds);
     if (toolData) {
-      const toolMap = new Map((toolData as any[]).map((t) => [t.id, t]));
+      const localized = localizeTools(toolData as any[], locale);
+      const toolMap = new Map(localized.map((t) => [t.id, t]));
       savedTools = toolIds.map((id: string) => toolMap.get(id)).filter(Boolean);
     }
   }

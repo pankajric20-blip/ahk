@@ -36,13 +36,13 @@ export function pickLocale(
 }
 
 /**
- * Adds pre-computed `name` and `tagline` fields to a tool row fetched from ai_tools.
- * Use this in server components that still query ai_tools directly (e.g. with joins).
+ * Adds pre-computed `name`, `tagline`, and `description` fields to a tool row
+ * fetched from ai_tools. Use this in server components that query ai_tools directly.
  */
 export function localizeToolFields<T extends Record<string, any>>(
   tool: T,
   locale: Locale,
-): T & { name: string; tagline: string | null } {
+): T & { name: string; tagline: string | null; description: string | null } {
   return {
     ...tool,
     name: pickLocale(tool.name_en, tool.name_hi, tool.name_hinglish, locale),
@@ -53,12 +53,23 @@ export function localizeToolFields<T extends Record<string, any>>(
         tool.tagline_hinglish,
         locale,
       ) || null,
+    description:
+      pickLocale(
+        tool.description_en,
+        tool.description_hi,
+        tool.description_hinglish,
+        locale,
+      ) || null,
   };
 }
 
 export function localizeTools<T extends Record<string, any>>(
   tools: T[],
   locale: Locale,
-): (T & { name: string; tagline: string | null })[] {
+): (T & {
+  name: string;
+  tagline: string | null;
+  description: string | null;
+})[] {
   return tools.map((t) => localizeToolFields(t, locale));
 }

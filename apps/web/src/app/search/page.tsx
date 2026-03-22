@@ -46,6 +46,7 @@ export default async function SearchPage({ searchParams }: Props) {
         .select(
           "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
             "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+            "description_en, description_hi, description_hinglish, " +
             "made_in_india, upi_payment_accepted, gst_compliant",
         )
         .eq("status", "approved")
