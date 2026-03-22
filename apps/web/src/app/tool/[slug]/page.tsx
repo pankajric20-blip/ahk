@@ -98,25 +98,23 @@ export default async function ToolDetailsPage({ params }: Props) {
   // Cast to any — ai_tools_i18n is not yet in the generated Supabase types
   const i18nResult = await (supabase as any)
     .from("ai_tools_i18n")
-    .select(
-      "name, tagline, description, summary, features, pros, cons, use_cases",
-    )
+    .select("name, tagline, description, summary")
     .eq("tool_id", tool.id)
     .eq("locale", locale)
     .maybeSingle();
   const i18n = i18nResult?.data as Record<string, any> | null;
 
-  // Merge pre-localized fields into tool object — old multi-locale columns as fallback
+  // Merge pre-localized text fields — keep original JSONB features/pros/cons/use_cases
+  // so tool-content.tsx can extract the right locale client-side on language switch.
   const localizedTool = {
     ...tool,
     name: i18n?.name || tool.name_en,
     tagline: i18n?.tagline || tool.tagline_en,
     description: i18n?.description || tool.description_en,
     summary: i18n?.summary || tool.hindi_summary,
-    features: i18n?.features ?? [],
-    pros: i18n?.pros ?? [],
-    cons: i18n?.cons ?? [],
-    use_cases: i18n?.use_cases ?? [],
+    // features/pros/cons/use_cases intentionally NOT overwritten —
+    // they remain as JSONB {en:[...], hi:[...], hinglish:[...]} from ai_tools,
+    // which lets getLangArray() in tool-content.tsx react to language changes.
   };
 
   // Build alternatives slug list

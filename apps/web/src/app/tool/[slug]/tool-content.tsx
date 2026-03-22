@@ -16,6 +16,14 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ToolLogo } from "@/components/tool/tool-logo";
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Extract the locale array from a JSONB {en:[...], hi:[...], hinglish:[...]} column */
+function getLangArray(jsonb: any, lang: string): string[] {
+  if (!jsonb) return [];
+  return (jsonb[lang] as string[]) || (jsonb["en"] as string[]) || [];
+}
+
 // ─── Back Link ────────────────────────────────────────────────────────────────
 
 export function ToolDetailBackLink() {
@@ -132,9 +140,9 @@ export function ToolHindiSummary({ tool }: { tool: any }) {
 // ─── Key Features ─────────────────────────────────────────────────────────────
 
 export function ToolFeatures({ tool }: { tool: any }) {
-  const { ui } = useLanguage();
-  // tool.features is TEXT[] from ai_tools_i18n (pre-localized by server)
-  const features: string[] = Array.isArray(tool.features) ? tool.features : [];
+  const { language, ui } = useLanguage();
+  // tool.features is JSONB {en:[...], hi:[...], hinglish:[...]} — getLangArray picks the right locale
+  const features = getLangArray(tool.features, language);
   if (!features.length) return null;
 
   return (
@@ -158,10 +166,9 @@ export function ToolFeatures({ tool }: { tool: any }) {
 // ─── Pros & Cons ──────────────────────────────────────────────────────────────
 
 export function ToolProscons({ tool }: { tool: any }) {
-  const { ui } = useLanguage();
-  // tool.pros / tool.cons are TEXT[] from ai_tools_i18n (pre-localized by server)
-  const pros: string[] = Array.isArray(tool.pros) ? tool.pros : [];
-  const cons: string[] = Array.isArray(tool.cons) ? tool.cons : [];
+  const { language, ui } = useLanguage();
+  const pros = getLangArray(tool.pros, language);
+  const cons = getLangArray(tool.cons, language);
   if (!pros.length && !cons.length) return null;
 
   return (
@@ -212,11 +219,8 @@ export function ToolProscons({ tool }: { tool: any }) {
 // ─── Use Cases ────────────────────────────────────────────────────────────────
 
 export function ToolUseCases({ tool }: { tool: any }) {
-  const { ui } = useLanguage();
-  // tool.use_cases is TEXT[] from ai_tools_i18n (pre-localized by server)
-  const useCases: string[] = Array.isArray(tool.use_cases)
-    ? tool.use_cases
-    : [];
+  const { language, ui } = useLanguage();
+  const useCases = getLangArray(tool.use_cases, language);
   if (!useCases.length) return null;
 
   return (
