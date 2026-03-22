@@ -6,8 +6,9 @@ import { ArrowRight } from "lucide-react";
 import { ToolLogo } from "./tool-logo";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Pre-localized shape — server components compute name/tagline before passing here.
-// All list/search/dashboard pages pass this shape; t() is no longer needed for tool data.
+// ToolCard accepts the full multi-locale shape from ai_tools so that
+// t() can react instantly to language changes without a page reload.
+// The optional name/tagline/description fields serve as pre-localized fallbacks.
 export interface LocalizedTool {
   id: string;
   slug: string;
@@ -16,7 +17,18 @@ export interface LocalizedTool {
   price_inr_monthly?: number | null;
   rating_avg?: number | null;
   rating_count?: number | null;
-  name: string;
+  // Multi-locale columns (preferred — enables instant client-side language switching)
+  name_en?: string | null;
+  name_hi?: string | null;
+  name_hinglish?: string | null;
+  description_en?: string | null;
+  description_hi?: string | null;
+  description_hinglish?: string | null;
+  tagline_en?: string | null;
+  tagline_hi?: string | null;
+  tagline_hinglish?: string | null;
+  // Pre-localized fallbacks (used when locale columns are absent)
+  name?: string;
   tagline?: string | null;
   description?: string | null;
   made_in_india?: boolean | null;
@@ -29,14 +41,29 @@ interface ToolCardProps {
 }
 
 export function ToolCard({ tool }: ToolCardProps) {
-  const { ui } = useLanguage();
+  const { t, ui } = useLanguage();
+
+  // Prefer client-side t() with locale columns for instant language switching.
+  // Fall back to pre-localized fields when locale columns are not in the query.
+  const displayName = tool.name_en
+    ? t(tool.name_en, tool.name_hi, tool.name_hinglish)
+    : (tool.name ?? "");
+
+  const displayDesc =
+    tool.description_en || tool.tagline_en
+      ? t(
+          tool.description_en || tool.tagline_en,
+          tool.description_hi || tool.tagline_hi,
+          tool.description_hinglish || tool.tagline_hinglish,
+        )
+      : tool.tagline || tool.description || "";
 
   return (
     <div className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full">
       <div className="flex flex-col p-6 flex-1">
         <div className="flex justify-between items-start mb-4">
           <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-            <ToolLogo logoUrl={tool.logo_url} name={tool.name} size="lg" />
+            <ToolLogo logoUrl={tool.logo_url} name={displayName} size="lg" />
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
@@ -57,12 +84,12 @@ export function ToolCard({ tool }: ToolCardProps) {
             href={`/tool/${tool.slug}`}
             className="before:absolute before:inset-0"
           >
-            {tool.name}
+            {displayName}
           </Link>
         </h3>
 
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
-          {tool.tagline || tool.description}
+          {displayDesc}
         </p>
 
         {/* Indian Context Badges */}
