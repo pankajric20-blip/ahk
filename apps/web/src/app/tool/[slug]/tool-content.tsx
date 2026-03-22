@@ -71,17 +71,22 @@ export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
 // ─── About / Description (shown ONCE) ────────────────────────────────────────
 
 export function ToolDescription({ tool }: { tool: any }) {
-  const { ui } = useLanguage();
+  const { language, ui } = useLanguage();
   const name = tool.name || tool.name_en;
   const desc = tool.description || tool.description_en;
 
   if (!desc) return null;
 
+  // Hindi grammar: "[Name] के बारे में" (name first, postposition after)
+  // Other languages: "About [Name]" (prefix first)
+  const heading =
+    language === "hi"
+      ? `${name} ${ui("tool_about_prefix")}`
+      : `${ui("tool_about_prefix")} ${name}`;
+
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none">
-      <h3 className="text-xl font-bold mb-3">
-        {ui("tool_about_prefix")} {name}
-      </h3>
+      <h3 className="text-xl font-bold mb-3">{heading}</h3>
       <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
         {desc}
       </div>
