@@ -297,6 +297,25 @@ export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
+/** Map a DB pricing_model value to its translation key */
+function getPricingKey(
+  model: string | null,
+): Parameters<ReturnType<typeof useLanguage>["ui"]>[0] {
+  const map: Record<
+    string,
+    Parameters<ReturnType<typeof useLanguage>["ui"]>[0]
+  > = {
+    free: "pricing_free",
+    freemium: "pricing_freemium",
+    paid: "pricing_paid",
+    free_trial: "pricing_free_trial",
+    enterprise: "pricing_enterprise",
+    contact_sales: "pricing_contact_sales",
+    open_source: "pricing_open_source",
+  };
+  return map[model ?? ""] ?? "pricing_paid";
+}
+
 export function ToolSidebar({ tool }: { tool: any }) {
   const { ui } = useLanguage();
 
@@ -321,7 +340,7 @@ export function ToolSidebar({ tool }: { tool: any }) {
           </dt>
           <dd className="font-medium flex items-center gap-2">
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold bg-secondary text-secondary-foreground">
-              {tool.pricing_model}
+              {ui(getPricingKey(tool.pricing_model))}
             </span>
           </dd>
         </div>
@@ -330,7 +349,9 @@ export function ToolSidebar({ tool }: { tool: any }) {
             <dt className="text-muted-foreground mb-1">
               {ui("tool_starting_price")}
             </dt>
-            <dd className="font-medium">₹{tool.price_inr_monthly} / month</dd>
+            <dd className="font-medium">
+              ₹{tool.price_inr_monthly} {ui("common_per_month")}
+            </dd>
           </div>
         )}
         {tool.free_tier_details && (

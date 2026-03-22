@@ -572,6 +572,32 @@ const translations = {
     hi: "बिल्कुल मुफ़्त",
     hinglish: "Bilkul Free",
   },
+  common_per_month: { en: "/ month", hi: "/ महीना", hinglish: "/ month" },
+
+  // Pricing model labels (maps DB values → localized display)
+  pricing_free: { en: "Free", hi: "मुफ़्त", hinglish: "Free" },
+  pricing_freemium: { en: "Freemium", hi: "फ्रीमियम", hinglish: "Freemium" },
+  pricing_paid: { en: "Paid", hi: "सशुल्क", hinglish: "Paid" },
+  pricing_free_trial: {
+    en: "Free Trial",
+    hi: "मुफ़्त परीक्षण",
+    hinglish: "Free Trial",
+  },
+  pricing_enterprise: {
+    en: "Enterprise",
+    hi: "एंटरप्राइज",
+    hinglish: "Enterprise",
+  },
+  pricing_contact_sales: {
+    en: "Contact Sales",
+    hi: "बिक्री से संपर्क करें",
+    hinglish: "Sales se Contact Karo",
+  },
+  pricing_open_source: {
+    en: "Open Source",
+    hi: "ओपन सोर्स",
+    hinglish: "Open Source",
+  },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
