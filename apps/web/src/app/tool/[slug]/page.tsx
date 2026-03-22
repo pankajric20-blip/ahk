@@ -25,6 +25,7 @@ import {
 } from "./tool-content";
 import { cache } from "react";
 import { getLoggedInUser } from "@/components/global/navbar";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 // Cache tool pages for 10 minutes — serves from edge cache between revalidations
 export const revalidate = 600;
@@ -81,14 +82,42 @@ export default async function ToolDetailsPage({ params }: Props) {
   const tool = await fetchTool(p.slug);
   if (!tool) notFound();
 
-  const user = await getLoggedInUser();
+  const [user, locale, cookieStore] = await Promise.all([
+    getLoggedInUser(),
+    getLocale(),
+    cookies(),
+  ]);
 
-  const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     cookieStore,
   );
+
+  // Fetch locale-specific i18n content (name, tagline, description, summary, arrays)
+  // Cast to any — ai_tools_i18n is not yet in the generated Supabase types
+  const i18nResult = await (supabase as any)
+    .from("ai_tools_i18n")
+    .select(
+      "name, tagline, description, summary, features, pros, cons, use_cases",
+    )
+    .eq("tool_id", tool.id)
+    .eq("locale", locale)
+    .maybeSingle();
+  const i18n = i18nResult?.data as Record<string, any> | null;
+
+  // Merge pre-localized fields into tool object — old multi-locale columns as fallback
+  const localizedTool = {
+    ...tool,
+    name: i18n?.name || tool.name_en,
+    tagline: i18n?.tagline || tool.tagline_en,
+    description: i18n?.description || tool.description_en,
+    summary: i18n?.summary || tool.hindi_summary,
+    features: i18n?.features ?? [],
+    pros: i18n?.pros ?? [],
+    cons: i18n?.cons ?? [],
+    use_cases: i18n?.use_cases ?? [],
+  };
 
   // Build alternatives slug list
   const alternativeSlugs: string[] = Array.isArray(tool.alternatives)
@@ -140,7 +169,10 @@ export default async function ToolDetailsPage({ params }: Props) {
 
   const initialBookmarked = !!bookmarkResult.data;
   const reviews: any[] = (reviewsResult.data as any[]) || [];
-  const alternativeTools: any[] = (altResult.data as any[]) || [];
+  const alternativeTools = localizeTools(
+    (altResult.data as any[]) || [],
+    locale,
+  );
 
   let currentUserReview: any = null;
   if (user) {
@@ -157,14 +189,18 @@ export default async function ToolDetailsPage({ params }: Props) {
           {/* Header */}
           <div className="flex items-start gap-6">
             <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center border shrink-0 overflow-hidden">
-              <ToolLogo logoUrl={tool.logo_url} name={tool.name_en} size="lg" />
+              <ToolLogo
+                logoUrl={localizedTool.logo_url}
+                name={localizedTool.name}
+                size="lg"
+              />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h1 className="text-3xl font-bold">
-                  <ToolName tool={tool} />
+                  <ToolName tool={localizedTool} />
                 </h1>
-                {tool.status === "approved" && (
+                {localizedTool.status === "approved" && (
                   <CheckCircle2 className="h-5 w-5 text-blue-500 shrink-0" />
                 )}
               </div>
@@ -173,23 +209,26 @@ export default async function ToolDetailsPage({ params }: Props) {
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center text-amber-500 font-semibold gap-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 text-sm">
                   <Star className="h-4 w-4 fill-amber-500" />
-                  {tool.rating_avg > 0 ? tool.rating_avg.toFixed(1) : "New"}
+                  {localizedTool.rating_avg > 0
+                    ? localizedTool.rating_avg.toFixed(1)
+                    : "New"}
                 </div>
-                {tool.review_count > 0 && (
+                {localizedTool.review_count > 0 && (
                   <span className="text-sm text-muted-foreground">
-                    ({tool.review_count} review{tool.review_count !== 1 && "s"})
+                    ({localizedTool.review_count} review
+                    {localizedTool.review_count !== 1 && "s"})
                   </span>
                 )}
               </div>
 
               {/* Tagline / Short description — shown ONCE here under the header */}
               <p className="text-lg text-muted-foreground mb-4">
-                <ToolShortDescription tool={tool} />
+                <ToolShortDescription tool={localizedTool} />
               </p>
 
               <div className="flex flex-wrap gap-2">
                 <ToolCategoryBadge toolCategory={toolCategory} />
-                {tool.made_in_india && (
+                {localizedTool.made_in_india && (
                   <span className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-orange-100 text-orange-800">
                     🇮🇳 Made in India
                   </span>
@@ -199,27 +238,27 @@ export default async function ToolDetailsPage({ params }: Props) {
           </div>
 
           {/* Screenshot — only when available */}
-          <ToolScreenshot tool={tool} />
+          <ToolScreenshot tool={localizedTool} />
 
           {/* Tutorial video — only when demo_video_url is set */}
-          {tool.demo_video_url && (
-            <YoutubeTutorialWidget url={tool.demo_video_url} />
+          {localizedTool.demo_video_url && (
+            <YoutubeTutorialWidget url={localizedTool.demo_video_url} />
           )}
 
-          {/* Hindi Summary — highlighted card for Indian users */}
-          <ToolHindiSummary tool={tool} />
+          {/* Summary card (was Hindi-only; now per-locale from ai_tools_i18n) */}
+          <ToolHindiSummary tool={localizedTool} />
 
           {/* About — full description, shown exactly once */}
-          <ToolDescription tool={tool} />
+          <ToolDescription tool={localizedTool} />
 
           {/* Key Features */}
-          <ToolFeatures tool={tool} />
+          <ToolFeatures tool={localizedTool} />
 
           {/* Pros & Cons */}
-          <ToolProscons tool={tool} />
+          <ToolProscons tool={localizedTool} />
 
           {/* Use Cases */}
-          <ToolUseCases tool={tool} />
+          <ToolUseCases tool={localizedTool} />
 
           {/* Alternative Tools */}
           {alternativeTools.length > 0 && (
@@ -233,8 +272,8 @@ export default async function ToolDetailsPage({ params }: Props) {
               <div className="w-full md:w-1/3 shrink-0">
                 <div className="sticky top-6">
                   <RatingForm
-                    toolId={tool.id}
-                    slug={tool.slug}
+                    toolId={localizedTool.id}
+                    slug={localizedTool.slug}
                     isLoggedIn={!!user}
                     initialRating={currentUserReview?.rating || 0}
                     initialTitle={currentUserReview?.title || ""}
@@ -255,11 +294,11 @@ export default async function ToolDetailsPage({ params }: Props) {
 
         {/* ── Sidebar ── */}
         <div className="col-span-1 border-t md:border-t-0 md:border-l pt-8 md:pt-0 md:pl-8 space-y-6">
-          <ToolSidebar tool={tool} />
+          <ToolSidebar tool={localizedTool} />
           <BookmarkButton
-            toolId={tool.id}
+            toolId={localizedTool.id}
             initialBookmarked={initialBookmarked}
-            slug={tool.slug}
+            slug={localizedTool.slug}
           />
         </div>
       </div>

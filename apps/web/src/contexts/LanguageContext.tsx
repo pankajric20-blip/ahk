@@ -36,12 +36,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("user_language");
     if (saved === "en" || saved === "hi" || saved === "hinglish") {
       setLanguage(saved);
+      // Sync to cookie so server components pick it up on next navigation
+      document.cookie = `user_language=${saved}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, []);
 
   const handleSetLanguage = (lang: LanguageType) => {
     setLanguage(lang);
     localStorage.setItem("user_language", lang);
+    // Also set a cookie so server components can read the locale without waiting for hydration
+    document.cookie = `user_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
   };
 
   // For database bilingual content (name_en / name_hi / description_hinglish)

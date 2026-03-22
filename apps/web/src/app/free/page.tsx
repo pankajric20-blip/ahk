@@ -3,6 +3,7 @@ import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";
 import { BackButton } from "@/components/global/back-button";
+import { getLocale } from "@/lib/get-locale";
 
 export const metadata = {
   title: "Free AI Tools | Aihkya",
@@ -11,7 +12,7 @@ export const metadata = {
 };
 
 export default async function FreeToolsPage() {
-  const cookieStore = await cookies();
+  const [cookieStore, locale] = await Promise.all([cookies(), getLocale()]);
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,10 +20,13 @@ export default async function FreeToolsPage() {
   );
 
   const { data: freeTools } = await supabase
-    .from("ai_tools")
-    .select("*")
+    .from("ai_tools_list")
+    .select(
+      "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
+        "name, tagline, made_in_india, upi_payment_accepted, gst_compliant",
+    )
     .eq("status", "approved")
-    // Filter by free or freemium tools
+    .eq("locale", locale)
     .in("pricing_model", ["free", "freemium", "free_trial"])
     .order("rating_avg", { ascending: false });
 

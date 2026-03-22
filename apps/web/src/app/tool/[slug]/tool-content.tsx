@@ -16,14 +16,6 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ToolLogo } from "@/components/tool/tool-logo";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Pick the right language array from a JSONB {en, hi, hinglish} object */
-function getLangArray(jsonb: any, lang: string): string[] {
-  if (!jsonb) return [];
-  return (jsonb[lang] as string[]) || (jsonb["en"] as string[]) || [];
-}
-
 // ─── Back Link ────────────────────────────────────────────────────────────────
 
 export function ToolDetailBackLink() {
@@ -42,22 +34,14 @@ export function ToolDetailBackLink() {
 // ─── Names & Short Description ────────────────────────────────────────────────
 
 export function ToolName({ tool }: { tool: any }) {
-  const { t } = useLanguage();
-  return (
-    <>{t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name_en}</>
-  );
+  return <>{tool.name || tool.name_en}</>;
 }
 
 export function ToolShortDescription({ tool }: { tool: any }) {
-  const { t } = useLanguage();
-  // Show tagline under the header — shorter marketing line
-  const tagline = t(tool.tagline_en, tool.tagline_hi, tool.tagline_hinglish);
+  // Show pre-localized tagline; fallback to first sentence of description
+  const tagline = tool.tagline || tool.tagline_en;
   if (tagline) return <>{tagline}</>;
-  // Fallback: first sentence of description
-  const desc =
-    t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
-    tool.description_en ||
-    "";
+  const desc = tool.description || tool.description_en || "";
   const firstSentence = desc.split(/[.।]/)[0].trim();
   return <>{firstSentence || desc}</>;
 }
@@ -65,18 +49,13 @@ export function ToolShortDescription({ tool }: { tool: any }) {
 // ─── Category Badge ───────────────────────────────────────────────────────────
 
 export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
-  const { t } = useLanguage();
   if (!toolCategory) return null;
   return (
     <Link
       href={`/categories/${toolCategory.slug}`}
       className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-accent text-accent-foreground hover:bg-accent/80"
     >
-      {t(
-        toolCategory.name_en,
-        toolCategory.name_hi,
-        toolCategory.name_hinglish,
-      )}
+      {toolCategory.name_en}
     </Link>
   );
 }
@@ -84,12 +63,9 @@ export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
 // ─── About / Description (shown ONCE) ────────────────────────────────────────
 
 export function ToolDescription({ tool }: { tool: any }) {
-  const { t, ui } = useLanguage();
-  const name =
-    t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name_en;
-  const desc =
-    t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
-    tool.description_en;
+  const { ui } = useLanguage();
+  const name = tool.name || tool.name_en;
+  const desc = tool.description || tool.description_en;
 
   if (!desc) return null;
 
@@ -136,7 +112,9 @@ export function ToolScreenshot({ tool }: { tool: any }) {
 
 export function ToolHindiSummary({ tool }: { tool: any }) {
   const { ui } = useLanguage();
-  if (!tool.hindi_summary) return null;
+  // 'summary' is the per-locale field from ai_tools_i18n; 'hindi_summary' is the old column
+  const summary = tool.summary || tool.hindi_summary;
+  if (!summary) return null;
 
   return (
     <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-5">
@@ -146,9 +124,7 @@ export function ToolHindiSummary({ tool }: { tool: any }) {
           {ui("tool_hindi_summary")}
         </h3>
       </div>
-      <p className="text-sm leading-relaxed text-foreground/90">
-        {tool.hindi_summary}
-      </p>
+      <p className="text-sm leading-relaxed text-foreground/90">{summary}</p>
     </div>
   );
 }
@@ -156,8 +132,9 @@ export function ToolHindiSummary({ tool }: { tool: any }) {
 // ─── Key Features ─────────────────────────────────────────────────────────────
 
 export function ToolFeatures({ tool }: { tool: any }) {
-  const { language, ui } = useLanguage();
-  const features = getLangArray(tool.features, language);
+  const { ui } = useLanguage();
+  // tool.features is TEXT[] from ai_tools_i18n (pre-localized by server)
+  const features: string[] = Array.isArray(tool.features) ? tool.features : [];
   if (!features.length) return null;
 
   return (
@@ -181,9 +158,10 @@ export function ToolFeatures({ tool }: { tool: any }) {
 // ─── Pros & Cons ──────────────────────────────────────────────────────────────
 
 export function ToolProscons({ tool }: { tool: any }) {
-  const { language, ui } = useLanguage();
-  const pros = getLangArray(tool.pros, language);
-  const cons = getLangArray(tool.cons, language);
+  const { ui } = useLanguage();
+  // tool.pros / tool.cons are TEXT[] from ai_tools_i18n (pre-localized by server)
+  const pros: string[] = Array.isArray(tool.pros) ? tool.pros : [];
+  const cons: string[] = Array.isArray(tool.cons) ? tool.cons : [];
   if (!pros.length && !cons.length) return null;
 
   return (
@@ -234,8 +212,11 @@ export function ToolProscons({ tool }: { tool: any }) {
 // ─── Use Cases ────────────────────────────────────────────────────────────────
 
 export function ToolUseCases({ tool }: { tool: any }) {
-  const { language, ui } = useLanguage();
-  const useCases = getLangArray(tool.use_cases, language);
+  const { ui } = useLanguage();
+  // tool.use_cases is TEXT[] from ai_tools_i18n (pre-localized by server)
+  const useCases: string[] = Array.isArray(tool.use_cases)
+    ? tool.use_cases
+    : [];
   if (!useCases.length) return null;
 
   return (
@@ -261,60 +242,45 @@ export function ToolUseCases({ tool }: { tool: any }) {
 // ─── Alternative Tools ────────────────────────────────────────────────────────
 
 interface AlternativeToolData {
-  id: string;
   slug: string;
-  name_en: string;
-  name_hi: string | null;
-  name_hinglish: string | null;
-  tagline_en: string | null;
-  tagline_hi: string | null;
-  tagline_hinglish: string | null;
-  logo_url: string | null;
-  pricing_model: string;
-  rating_avg: number;
+  name: string;
+  tagline?: string | null;
+  logo_url?: string | null;
+  pricing_model?: string | null;
 }
 
 export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
-  const { t, ui } = useLanguage();
+  const { ui } = useLanguage();
   if (!tools.length) return null;
 
   return (
     <div>
       <h3 className="text-xl font-bold mb-4">{ui("tool_alternatives")}</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {tools.map((alt) => {
-          const name =
-            t(alt.name_en, alt.name_hi, alt.name_hinglish) || alt.name_en;
-          const tagline = t(
-            alt.tagline_en,
-            alt.tagline_hi,
-            alt.tagline_hinglish,
-          );
-          return (
-            <Link
-              key={alt.slug}
-              href={`/tool/${alt.slug}`}
-              className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center hover:bg-accent/50 hover:border-primary/30 transition-colors"
-            >
-              <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center border overflow-hidden shrink-0">
-                <ToolLogo logoUrl={alt.logo_url} name={alt.name_en} size="sm" />
-              </div>
-              <div className="min-w-0 w-full">
-                <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                  {name}
+        {tools.map((alt) => (
+          <Link
+            key={alt.slug}
+            href={`/tool/${alt.slug}`}
+            className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center hover:bg-accent/50 hover:border-primary/30 transition-colors"
+          >
+            <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center border overflow-hidden shrink-0">
+              <ToolLogo logoUrl={alt.logo_url} name={alt.name} size="sm" />
+            </div>
+            <div className="min-w-0 w-full">
+              <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+                {alt.name}
+              </p>
+              {alt.tagline && (
+                <p className="text-xs text-muted-foreground truncate mt-0.5">
+                  {alt.tagline}
                 </p>
-                {tagline && (
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    {tagline}
-                  </p>
-                )}
-                <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mt-1.5 bg-secondary text-secondary-foreground">
-                  {alt.pricing_model}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
+              )}
+              <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mt-1.5 bg-secondary text-secondary-foreground">
+                {alt.pricing_model}
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

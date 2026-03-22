@@ -12,6 +12,7 @@ import {
   CategoryPricingLabel,
   CategoryEmptyState,
 } from "./category-content";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -59,9 +60,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const category: any = data;
   if (!category) notFound();
 
+  const locale = await getLocale();
+
   let query = supabase
     .from("ai_tools")
-    .select("*, tool_tasks!inner(task_id)")
+    .select(
+      "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
+        "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+        "made_in_india, upi_payment_accepted, gst_compliant, tool_tasks!inner(task_id)",
+    )
     .eq("tool_tasks.task_id", category.id)
     .eq("status", "approved")
     .order("is_sponsored", { ascending: false })
@@ -76,7 +83,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const { data: categoryTools, error } = await query;
   if (error) console.error(error);
-  const tools = categoryTools ?? [];
+  const tools = localizeTools(categoryTools ?? [], locale);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">

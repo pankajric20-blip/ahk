@@ -10,47 +10,28 @@ import {
   HomeSearchBar,
   HomeBadge,
 } from "@/components/global/localized-sections";
+import { getLocale } from "@/lib/get-locale";
 
 // Cache the homepage for 5 minutes — re-render in background on next request
 export const revalidate = 300;
 
 export default async function Home() {
-  const cookieStore = await cookies();
+  const [cookieStore, locale] = await Promise.all([cookies(), getLocale()]);
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     cookieStore,
   );
 
-  // Single query: featured/sponsored first, fall back to top-rated — no N+1
-  const toolColumns = [
-    "id",
-    "name_en",
-    "name_hi",
-    "name_hinglish",
-    "slug",
-    "logo_url",
-    "pricing_model",
-    "price_inr_monthly",
-    "rating_avg",
-    "rating_count",
-    "description_en",
-    "description_hi",
-    "description_hinglish",
-    "tagline_en",
-    "tagline_hi",
-    "tagline_hinglish",
-    "made_in_india",
-    "upi_payment_accepted",
-    "gst_compliant",
-    "is_featured",
-    "is_sponsored",
-  ].join(", ");
-
+  // Single query against the lean list view — one locale, no heavy JSONB columns
   const { data: featuredTools } = await supabase
-    .from("ai_tools")
-    .select(toolColumns)
+    .from("ai_tools_list")
+    .select(
+      "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
+        "name, tagline, made_in_india, upi_payment_accepted, gst_compliant, is_featured, is_sponsored",
+    )
     .eq("status", "approved")
+    .eq("locale", locale)
     .order("is_featured", { ascending: false })
     .order("is_sponsored", { ascending: false })
     .order("rating_avg", { ascending: false })

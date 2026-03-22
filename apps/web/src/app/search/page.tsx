@@ -8,6 +8,7 @@ import {
   SearchEmptyPrompt,
   SearchNoResults,
 } from "./search-content";
+import { getLocale, localizeTools } from "@/lib/get-locale";
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -31,6 +32,7 @@ export default async function SearchPage({ searchParams }: Props) {
     cookieStore,
   );
 
+  const locale = await getLocale();
   let searchResults: any[] = [];
 
   if (q) {
@@ -41,14 +43,18 @@ export default async function SearchPage({ searchParams }: Props) {
     if (safeQ) {
       const { data } = await supabase
         .from("ai_tools")
-        .select("*")
+        .select(
+          "id, slug, logo_url, pricing_model, price_inr_monthly, rating_avg, rating_count, " +
+            "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+            "made_in_india, upi_payment_accepted, gst_compliant",
+        )
         .eq("status", "approved")
         .textSearch("search_vector", safeQ, {
           type: "websearch",
-          config: "english",
+          config: "simple", // matches the 'simple' config used when building search_vector
         })
         .order("rating_avg", { ascending: false });
-      if (data) searchResults = data;
+      if (data) searchResults = localizeTools(data, locale);
     }
   }
 

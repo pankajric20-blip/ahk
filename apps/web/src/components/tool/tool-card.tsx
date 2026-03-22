@@ -5,34 +5,37 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ToolLogo } from "./tool-logo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Database } from "@aihkya/db";
 
-type AITool = Database["public"]["Tables"]["ai_tools"]["Row"];
+// Pre-localized shape — server components compute name/tagline before passing here.
+// All list/search/dashboard pages pass this shape; t() is no longer needed for tool data.
+export interface LocalizedTool {
+  id: string;
+  slug: string;
+  logo_url?: string | null;
+  pricing_model?: string | null;
+  price_inr_monthly?: number | null;
+  rating_avg?: number | null;
+  rating_count?: number | null;
+  name: string;
+  tagline?: string | null;
+  made_in_india?: boolean | null;
+  upi_payment_accepted?: boolean | null;
+  gst_compliant?: boolean | null;
+}
 
 interface ToolCardProps {
-  tool: AITool;
+  tool: LocalizedTool;
 }
 
 export function ToolCard({ tool }: ToolCardProps) {
-  const { t, ui } = useLanguage();
-
-  const displayName = t(
-    tool.name_en,
-    tool.name_hi,
-    (tool as any).name_hinglish,
-  );
-  const displayDesc = t(
-    tool.description_en,
-    tool.description_hi,
-    (tool as any).description_hinglish,
-  );
+  const { ui } = useLanguage();
 
   return (
     <div className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col h-full">
       <div className="flex flex-col p-6 flex-1">
         <div className="flex justify-between items-start mb-4">
           <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-            <ToolLogo logoUrl={tool.logo_url} name={displayName} size="lg" />
+            <ToolLogo logoUrl={tool.logo_url} name={tool.name} size="lg" />
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
@@ -53,12 +56,12 @@ export function ToolCard({ tool }: ToolCardProps) {
             href={`/tool/${tool.slug}`}
             className="before:absolute before:inset-0"
           >
-            {displayName}
+            {tool.name}
           </Link>
         </h3>
 
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
-          {displayDesc}
+          {tool.tagline}
         </p>
 
         {/* Indian Context Badges */}
