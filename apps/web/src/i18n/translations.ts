@@ -574,6 +574,136 @@ const translations = {
   },
   common_per_month: { en: "/ month", hi: "/ महीना", hinglish: "/ month" },
 
+  // ── Review Form ───────────────────────────────────────────────────────────
+  review_form_title: {
+    en: "Leave a Review",
+    hi: "समीक्षा दें",
+    hinglish: "Review Do",
+  },
+  review_form_login_required: {
+    en: "You must be logged in to leave a rich review.",
+    hi: "समीक्षा देने के लिए कृपया लॉग इन करें।",
+    hinglish: "Rich review ke liye login karo.",
+  },
+  review_form_sign_in: {
+    en: "Sign In Now",
+    hi: "अभी साइन इन करें",
+    hinglish: "Sign In Karo",
+  },
+  review_form_rating_label: {
+    en: "Your Rating",
+    hi: "आपकी रेटिंग",
+    hinglish: "Aapki Rating",
+  },
+  review_form_title_label: {
+    en: "Review Title",
+    hi: "समीक्षा का शीर्षक",
+    hinglish: "Review Title",
+  },
+  review_form_title_placeholder: {
+    en: "Sum up your experience",
+    hi: "अपना अनुभव संक्षेप में बताएं",
+    hinglish: "Apna experience short mein batao",
+  },
+  review_form_text_label: {
+    en: "Your Review",
+    hi: "आपकी समीक्षा",
+    hinglish: "Aapki Review",
+  },
+  review_form_text_placeholder: {
+    en: "How did this tool help your business or workflow? Did you face any issues?",
+    hi: "यह टूल आपके काम में कैसे मदद करता है? कोई समस्या आई?",
+    hinglish: "Ye tool aapke kaam mein kaise helpful raha? Koi dikkat aayi?",
+  },
+  review_form_use_case_label: {
+    en: "Use Case",
+    hi: "उपयोग का क्षेत्र",
+    hinglish: "Use Case",
+  },
+  review_form_use_case_placeholder: {
+    en: "e.g. Sales Calls, Graphic Design",
+    hi: "जैसे: बिक्री, ग्राफिक डिज़ाइन",
+    hinglish: "jaise: Sales, Graphic Design",
+  },
+  review_form_duration_label: {
+    en: "Usage Duration",
+    hi: "कितने समय से उपयोग कर रहे हैं",
+    hinglish: "Kitne time se use kar rahe ho",
+  },
+  review_form_duration_select: {
+    en: "Select duration...",
+    hi: "अवधि चुनें...",
+    hinglish: "Duration chuno...",
+  },
+  review_form_duration_testing: {
+    en: "Just testing",
+    hi: "बस आज़मा रहा/रही हूं",
+    hinglish: "Abhi try kar raha/rahi hoon",
+  },
+  review_form_duration_less1m: {
+    en: "Less than 1 month",
+    hi: "1 महीने से कम",
+    hinglish: "1 mahine se kam",
+  },
+  review_form_duration_1to6m: {
+    en: "1–6 months",
+    hi: "1–6 महीने",
+    hinglish: "1–6 mahine",
+  },
+  review_form_duration_over6m: {
+    en: "Over 6 months",
+    hi: "6 महीने से अधिक",
+    hinglish: "6 mahine se zyada",
+  },
+  review_form_submit: {
+    en: "Publish Review",
+    hi: "समीक्षा प्रकाशित करें",
+    hinglish: "Review Publish Karo",
+  },
+  review_form_submitting: {
+    en: "Submitting...",
+    hi: "जमा हो रहा है...",
+    hinglish: "Submit ho raha hai...",
+  },
+  review_form_success: {
+    en: "Review submitted! Thank you for sharing your thoughts.",
+    hi: "समीक्षा जमा हो गई! आपके विचार साझा करने के लिए धन्यवाद।",
+    hinglish: "Review submit ho gayi! Share karne ke liye shukriya.",
+  },
+  review_form_error_login: {
+    en: "Please log in to leave a review.",
+    hi: "समीक्षा देने के लिए लॉग इन करें।",
+    hinglish: "Review dene ke liye login karo.",
+  },
+  review_form_error_rating: {
+    en: "Please select a rating.",
+    hi: "कृपया रेटिंग चुनें।",
+    hinglish: "Please rating chuno.",
+  },
+
+  // ── Review List ───────────────────────────────────────────────────────────
+  review_list_empty_title: {
+    en: "No reviews yet. Be the first!",
+    hi: "अभी तक कोई समीक्षा नहीं। पहले बनें!",
+    hinglish: "Abhi koi review nahi. Pehle bano!",
+  },
+  review_list_empty_desc: {
+    en: "Your feedback helps other creators and founders in India make better software decisions.",
+    hi: "आपकी राय भारत के क्रिएटर्स और उद्यमियों को बेहतर सॉफ्टवेयर चुनने में मदद करती है।",
+    hinglish:
+      "Aapki feedback India ke creators aur founders ko better decisions lene mein help karti hai.",
+  },
+  review_list_used_for: {
+    en: "Used for:",
+    hi: "इस्तेमाल किया:",
+    hinglish: "Use kiya:",
+  },
+  review_list_use_case: {
+    en: "Use Case:",
+    hi: "उपयोग क्षेत्र:",
+    hinglish: "Use Case:",
+  },
+
   // Pricing model labels (maps DB values → localized display)
   pricing_free: { en: "Free", hi: "मुफ़्त", hinglish: "Free" },
   pricing_freemium: { en: "Freemium", hi: "फ्रीमियम", hinglish: "Freemium" },

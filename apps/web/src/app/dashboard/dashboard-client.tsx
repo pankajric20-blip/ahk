@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Bookmark,
   Star,
@@ -23,6 +24,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getPricingKey } from "@/lib/pricing";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UserInfo {
@@ -150,8 +152,13 @@ function ToolLogoSmall({
 }) {
   if (logoUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={logoUrl} alt={name} className="w-full h-full object-contain" />
+      <Image
+        src={logoUrl}
+        alt={name}
+        width={40}
+        height={40}
+        className="w-full h-full object-contain"
+      />
     );
   }
   return (
@@ -180,10 +187,6 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 // ─── Pricing label helper ─────────────────────────────────────────────────────
-function pricingLabel(model: string, freeLabel: string) {
-  if (model === "free") return freeLabel;
-  return model.replace(/_/g, " ");
-}
 
 // ─── Review status badge helper ───────────────────────────────────────────────
 function StatusBadge({
@@ -585,10 +588,7 @@ export function DashboardClient({
                                       </div>
                                     ) : null}
                                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-secondary text-secondary-foreground capitalize">
-                                      {pricingLabel(
-                                        tool.pricing_model,
-                                        ui("common_free"),
-                                      )}
+                                      {ui(getPricingKey(tool.pricing_model))}
                                     </span>
                                   </div>
                                 </div>

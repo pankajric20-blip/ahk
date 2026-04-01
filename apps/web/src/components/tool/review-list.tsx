@@ -1,5 +1,8 @@
+"use client";
+
 import { Star, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Review {
   id: string;
@@ -20,6 +23,10 @@ interface ReviewListProps {
 }
 
 export function ReviewList({ reviews }: ReviewListProps) {
+  const { language, ui } = useLanguage();
+
+  const dateLocale = language === "hi" ? "hi-IN" : "en-IN";
+
   if (!reviews || reviews.length === 0) {
     return (
       <div className="py-12 text-center border rounded-xl border-dashed bg-muted/10">
@@ -27,11 +34,10 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <Star className="h-6 w-6 text-muted-foreground/50" />
         </div>
         <p className="text-muted-foreground font-medium text-lg">
-          No reviews yet. Be the first!
+          {ui("review_list_empty_title")}
         </p>
         <p className="text-muted-foreground/80 text-sm max-w-sm mx-auto mt-2">
-          Your feedback helps other creators and founders in India make the best
-          software decisions.
+          {ui("review_list_empty_desc")}
         </p>
       </div>
     );
@@ -72,16 +78,21 @@ export function ReviewList({ reviews }: ReviewListProps) {
                 </p>
                 <div className="flex items-center text-xs text-muted-foreground gap-2">
                   <span>
-                    {new Date(review.created_at).toLocaleDateString("en-IN", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {new Date(review.created_at).toLocaleDateString(
+                      dateLocale,
+                      {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      },
+                    )}
                   </span>
                   {review.usage_duration && (
                     <>
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                      <span>Used for: {review.usage_duration}</span>
+                      <span>
+                        {ui("review_list_used_for")} {review.usage_duration}
+                      </span>
                     </>
                   )}
                 </div>
@@ -109,7 +120,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
 
             {review.use_case && (
               <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold bg-muted/50 text-muted-foreground">
-                Use Case: {review.use_case}
+                {ui("review_list_use_case")} {review.use_case}
               </div>
             )}
 

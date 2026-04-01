@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "AihKya - India ka AI Tools Directory | Hindi mein",
+  description:
+    "AihKya — Discover 200+ AI tools with Hindi reviews, INR pricing, and free tool guides. India ka pehla Hindi-first AI tools platform.",
+  alternates: { canonical: "/" },
+};
 import { createServerClient } from "@aihkya/db";
 import { cookies } from "next/headers";
 import { ToolCard } from "@/components/tool/tool-card";

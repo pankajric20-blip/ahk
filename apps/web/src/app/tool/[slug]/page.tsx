@@ -26,6 +26,7 @@ import {
 import { cache } from "react";
 import { getLoggedInUser } from "@/components/global/navbar";
 import { getLocale, localizeTools } from "@/lib/get-locale";
+import { ToolJsonLd, BreadcrumbJsonLd } from "@/components/tool/tool-jsonld";
 
 // Cache tool pages for 10 minutes — serves from edge cache between revalidations
 export const revalidate = 600;
@@ -69,10 +70,39 @@ const fetchTool = cache(async (slug: string) => {
 export async function generateMetadata({ params }: Props) {
   const p = await params;
   const tool = await fetchTool(p.slug);
-  if (!tool) return { title: "Tool Not Found - Aihkya" };
+  if (!tool) return { title: "Tool Not Found - AihKya" };
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aihkya.com";
+  const title = `${tool.name_en} - AI Tool Reviews & Hindi Guide | AihKya`;
+  const description =
+    tool.description_en ||
+    tool.tagline_en ||
+    `${tool.name_en} review, pricing in India, Hindi guide on AihKya.`;
+  const toolUrl = `${baseUrl}/tool/${tool.slug}`;
+
   return {
-    title: `${tool.name_en} - AI Tool Details | Aihkya`,
-    description: tool.description_en,
+    title,
+    description,
+    alternates: { canonical: toolUrl },
+    openGraph: {
+      title,
+      description,
+      url: toolUrl,
+      siteName: "AihKya",
+      type: "website",
+      locale: "hi_IN",
+      ...(tool.logo_url && {
+        images: [
+          { url: tool.logo_url, width: 512, height: 512, alt: tool.name_en },
+        ],
+      }),
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(tool.logo_url && { images: [tool.logo_url] }),
+    },
   };
 }
 
@@ -179,6 +209,15 @@ export default async function ToolDetailsPage({ params }: Props) {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
+      {/* Structured data for AEO / Google Rich Results */}
+      <ToolJsonLd tool={tool} />
+      <BreadcrumbJsonLd
+        toolName={tool.name_en}
+        toolSlug={tool.slug}
+        categoryName={toolCategory?.name_en}
+        categorySlug={toolCategory?.slug}
+      />
+
       <ToolDetailBackLink />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -34,11 +34,11 @@ export function RatingForm({
   const [useCase, setUseCase] = useState(initialUseCase);
   const [usageDuration, setUsageDuration] = useState(initialUsageDuration);
   const [isPending, startTransition] = useTransition();
-  const { language } = useLanguage();
+  const { language, ui } = useLanguage();
 
   const handleRatingClick = (newRating: number) => {
     if (!isLoggedIn) {
-      toast.error("Please log in to leave a review.");
+      toast.error(ui("review_form_error_login"));
       return;
     }
     setRating(newRating);
@@ -48,12 +48,12 @@ export function RatingForm({
     e.preventDefault();
 
     if (!isLoggedIn) {
-      toast.error("Please log in to leave a review.");
+      toast.error(ui("review_form_error_login"));
       return;
     }
 
     if (rating === 0) {
-      toast.error("Please select a rating.");
+      toast.error(ui("review_form_error_rating"));
       return;
     }
 
@@ -72,25 +72,23 @@ export function RatingForm({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(
-          "Review submitted successfully! Thank you for sharing your thoughts.",
-        );
+        toast.success(ui("review_form_success"));
       }
     });
   };
 
   return (
     <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
-      <h3 className="font-semibold text-lg mb-4">Leave a Review</h3>
+      <h3 className="font-semibold text-lg mb-4">{ui("review_form_title")}</h3>
 
       {!isLoggedIn && (
         <div className="mb-4 text-sm text-amber-600 bg-amber-500/10 p-3 rounded-md border border-amber-500/20 flex flex-col items-start gap-2">
-          You must be logged in to leave a rich review.
+          {ui("review_form_login_required")}
           <a
             href="/login"
             className="px-3 py-1 bg-amber-500/20 text-amber-700 font-semibold rounded text-xs hover:bg-amber-500/30"
           >
-            Sign In Now
+            {ui("review_form_sign_in")}
           </a>
         </div>
       )}
@@ -98,7 +96,8 @@ export function RatingForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Your Rating <span className="text-destructive">*</span>
+            {ui("review_form_rating_label")}{" "}
+            <span className="text-destructive">*</span>
           </label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -125,11 +124,11 @@ export function RatingForm({
 
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
-            Review Title
+            {ui("review_form_title_label")}
           </label>
           <input
             type="text"
-            placeholder="Sum up your experience"
+            placeholder={ui("review_form_title_placeholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={!isLoggedIn || isPending}
@@ -139,10 +138,10 @@ export function RatingForm({
 
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
-            Your Review
+            {ui("review_form_text_label")}
           </label>
           <textarea
-            placeholder="How did this tool help your business or workflow? Did you face any issues?"
+            placeholder={ui("review_form_text_placeholder")}
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
             disabled={!isLoggedIn || isPending}
@@ -153,11 +152,11 @@ export function RatingForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
-              Use Case
+              {ui("review_form_use_case_label")}
             </label>
             <input
               type="text"
-              placeholder="e.g. Sales Calls, Graphic Design"
+              placeholder={ui("review_form_use_case_placeholder")}
               value={useCase}
               onChange={(e) => setUseCase(e.target.value)}
               disabled={!isLoggedIn || isPending}
@@ -167,7 +166,7 @@ export function RatingForm({
 
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
-              Usage Duration
+              {ui("review_form_duration_label")}
             </label>
             <select
               value={usageDuration}
@@ -175,11 +174,19 @@ export function RatingForm({
               disabled={!isLoggedIn || isPending}
               className="w-full h-10 rounded-md border border-input bg-background/50 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="">Select duration...</option>
-              <option value="Just testing">Just testing</option>
-              <option value="Less than 1 month">Less than 1 month</option>
-              <option value="1-6 months">1-6 months</option>
-              <option value="Over 6 months">Over 6 months</option>
+              <option value="">{ui("review_form_duration_select")}</option>
+              <option value="Just testing">
+                {ui("review_form_duration_testing")}
+              </option>
+              <option value="Less than 1 month">
+                {ui("review_form_duration_less1m")}
+              </option>
+              <option value="1-6 months">
+                {ui("review_form_duration_1to6m")}
+              </option>
+              <option value="Over 6 months">
+                {ui("review_form_duration_over6m")}
+              </option>
             </select>
           </div>
         </div>
@@ -192,12 +199,12 @@ export function RatingForm({
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
+              {ui("review_form_submitting")}
             </>
           ) : (
             <>
               <Send className="mr-2 h-4 w-4" />
-              Publish Review
+              {ui("review_form_submit")}
             </>
           )}
         </button>

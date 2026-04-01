@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ToolLogo } from "./tool-logo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getPricingKey } from "@/lib/pricing";
 
 // ToolCard accepts the full multi-locale shape from ai_tools so that
 // t() can react instantly to language changes without a page reload.
@@ -67,9 +68,7 @@ export function ToolCard({ tool }: ToolCardProps) {
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
-              {tool.pricing_model === "free"
-                ? ui("common_bilkul_free")
-                : tool.pricing_model}
+              {ui(getPricingKey(tool.pricing_model))}
             </span>
             {tool.price_inr_monthly && (
               <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">

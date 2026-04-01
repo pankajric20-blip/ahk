@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ToolLogo } from "@/components/tool/tool-logo";
+import { getPricingKey } from "@/lib/pricing";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -259,7 +260,7 @@ interface AlternativeToolData {
 }
 
 export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
-  const { ui } = useLanguage();
+  const { ui, t } = useLanguage();
   if (!tools.length) return null;
 
   return (
@@ -285,7 +286,7 @@ export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
                 </p>
               )}
               <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mt-1.5 bg-secondary text-secondary-foreground">
-                {alt.pricing_model}
+                {ui(getPricingKey(alt.pricing_model))}
               </span>
             </div>
           </Link>
@@ -296,25 +297,6 @@ export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-/** Map a DB pricing_model value to its translation key */
-function getPricingKey(
-  model: string | null,
-): Parameters<ReturnType<typeof useLanguage>["ui"]>[0] {
-  const map: Record<
-    string,
-    Parameters<ReturnType<typeof useLanguage>["ui"]>[0]
-  > = {
-    free: "pricing_free",
-    freemium: "pricing_freemium",
-    paid: "pricing_paid",
-    free_trial: "pricing_free_trial",
-    enterprise: "pricing_enterprise",
-    contact_sales: "pricing_contact_sales",
-    open_source: "pricing_open_source",
-  };
-  return map[model ?? ""] ?? "pricing_paid";
-}
 
 export function ToolSidebar({ tool }: { tool: any }) {
   const { ui } = useLanguage();
