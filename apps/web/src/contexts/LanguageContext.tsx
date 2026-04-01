@@ -34,10 +34,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("user_language");
-    if (saved === "en" || saved === "hi" || saved === "hinglish") {
-      setLanguage(saved);
-      // Sync to cookie so server components pick it up on next navigation
-      document.cookie = `user_language=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+    // Default to "hi" if no preference saved — this is a Hindi-first platform
+    const lang: LanguageType =
+      saved === "en" || saved === "hi" || saved === "hinglish" ? saved : "hi";
+    setLanguage(lang);
+    // Always write the cookie so server components can read the locale
+    // from the very first navigation after hydration
+    document.cookie = `user_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+    if (!saved) {
+      localStorage.setItem("user_language", lang);
     }
   }, []);
 
