@@ -43,14 +43,21 @@ export function ToolDetailBackLink() {
 // ─── Names & Short Description ────────────────────────────────────────────────
 
 export function ToolName({ tool }: { tool: any }) {
-  return <>{tool.name || tool.name_en}</>;
+  const { t } = useLanguage();
+  // Prefer t() with locale columns for instant language switching;
+  // fall back to pre-localized server value
+  return <>{t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name}</>;
 }
 
 export function ToolShortDescription({ tool }: { tool: any }) {
-  // Show pre-localized tagline; fallback to first sentence of description
-  const tagline = tool.tagline || tool.tagline_en;
+  const { t } = useLanguage();
+  const tagline =
+    t(tool.tagline_en, tool.tagline_hi, tool.tagline_hinglish) || tool.tagline;
   if (tagline) return <>{tagline}</>;
-  const desc = tool.description || tool.description_en || "";
+  const desc =
+    t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
+    tool.description ||
+    "";
   const firstSentence = desc.split(/[.।]/)[0].trim();
   return <>{firstSentence || desc}</>;
 }
@@ -58,13 +65,17 @@ export function ToolShortDescription({ tool }: { tool: any }) {
 // ─── Category Badge ───────────────────────────────────────────────────────────
 
 export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
+  const { t } = useLanguage();
   if (!toolCategory) return null;
+  const name =
+    t(toolCategory.name_en, toolCategory.name_hi, toolCategory.name_hinglish) ||
+    toolCategory.name_en;
   return (
     <Link
       href={`/categories/${toolCategory.slug}`}
       className="inline-flex items-center rounded-full border px-3 py-1 text-sm bg-accent text-accent-foreground hover:bg-accent/80"
     >
-      {toolCategory.name_en}
+      {name}
     </Link>
   );
 }
@@ -72,9 +83,11 @@ export function ToolCategoryBadge({ toolCategory }: { toolCategory: any }) {
 // ─── About / Description (shown ONCE) ────────────────────────────────────────
 
 export function ToolDescription({ tool }: { tool: any }) {
-  const { language, ui } = useLanguage();
-  const name = tool.name || tool.name_en;
-  const desc = tool.description || tool.description_en;
+  const { language, t, ui } = useLanguage();
+  const name = t(tool.name_en, tool.name_hi, tool.name_hinglish) || tool.name;
+  const desc =
+    t(tool.description_en, tool.description_hi, tool.description_hinglish) ||
+    tool.description;
 
   if (!desc) return null;
 
@@ -125,10 +138,12 @@ export function ToolScreenshot({ tool }: { tool: any }) {
 // ─── Hindi Summary Card ───────────────────────────────────────────────────────
 
 export function ToolHindiSummary({ tool }: { tool: any }) {
-  const { ui } = useLanguage();
-  // 'summary' is the per-locale field from ai_tools_i18n; 'hindi_summary' is the old column
+  const { language, ui } = useLanguage();
+  // summary is fetched from ai_tools_i18n for the server locale.
+  // Only render the summary card when language is Hindi, since we only
+  // have one locale's summary available client-side.
   const summary = tool.summary || tool.hindi_summary;
-  if (!summary) return null;
+  if (!summary || language !== "hi") return null;
 
   return (
     <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-5">
@@ -253,8 +268,14 @@ export function ToolUseCases({ tool }: { tool: any }) {
 
 interface AlternativeToolData {
   slug: string;
-  name: string;
+  name?: string;
+  name_en?: string | null;
+  name_hi?: string | null;
+  name_hinglish?: string | null;
   tagline?: string | null;
+  tagline_en?: string | null;
+  tagline_hi?: string | null;
+  tagline_hinglish?: string | null;
   logo_url?: string | null;
   pricing_model?: string | null;
 }
@@ -267,30 +288,37 @@ export function ToolAlternatives({ tools }: { tools: AlternativeToolData[] }) {
     <div>
       <h3 className="text-xl font-bold mb-4">{ui("tool_alternatives")}</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {tools.map((alt) => (
-          <Link
-            key={alt.slug}
-            href={`/tool/${alt.slug}`}
-            className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center hover:bg-accent/50 hover:border-primary/30 transition-colors"
-          >
-            <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center border overflow-hidden shrink-0">
-              <ToolLogo logoUrl={alt.logo_url} name={alt.name} size="sm" />
-            </div>
-            <div className="min-w-0 w-full">
-              <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                {alt.name}
-              </p>
-              {alt.tagline && (
-                <p className="text-xs text-muted-foreground truncate mt-0.5">
-                  {alt.tagline}
+        {tools.map((alt) => {
+          const displayName =
+            t(alt.name_en, alt.name_hi, alt.name_hinglish) || alt.name || "";
+          const displayTagline =
+            t(alt.tagline_en, alt.tagline_hi, alt.tagline_hinglish) ||
+            alt.tagline;
+          return (
+            <Link
+              key={alt.slug}
+              href={`/tool/${alt.slug}`}
+              className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center hover:bg-accent/50 hover:border-primary/30 transition-colors"
+            >
+              <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center border overflow-hidden shrink-0">
+                <ToolLogo logoUrl={alt.logo_url} name={displayName} size="sm" />
+              </div>
+              <div className="min-w-0 w-full">
+                <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+                  {displayName}
                 </p>
-              )}
-              <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mt-1.5 bg-secondary text-secondary-foreground">
-                {ui(getPricingKey(alt.pricing_model))}
-              </span>
-            </div>
-          </Link>
-        ))}
+                {displayTagline && (
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {displayTagline}
+                  </p>
+                )}
+                <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs mt-1.5 bg-secondary text-secondary-foreground">
+                  {ui(getPricingKey(alt.pricing_model))}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

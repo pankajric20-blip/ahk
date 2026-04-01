@@ -157,7 +157,7 @@ export default async function ToolDetailsPage({ params }: Props) {
     await Promise.all([
       supabase
         .from("tool_tasks")
-        .select("task_categories(name_en, name_hi, slug)")
+        .select("task_categories(name_en, name_hi, name_hinglish, slug)")
         .eq("tool_id", tool.id)
         .limit(1)
         .single(),
