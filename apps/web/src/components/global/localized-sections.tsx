@@ -1,6 +1,7 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function HomeBadge() {
@@ -36,6 +37,33 @@ export function HeroSection() {
         {ui("home_hero_subtitle")}
       </p>
     </>
+  );
+}
+
+export function HomeViewAllLink({ className }: { className?: string }) {
+  const { ui } = useLanguage();
+  return (
+    <Link
+      href="/categories"
+      className={
+        className ??
+        "hidden sm:flex items-center text-primary font-medium hover:underline underline-offset-4 shrink-0"
+      }
+    >
+      {ui("home_view_all")} <ArrowRight className="ml-1 h-4 w-4" />
+    </Link>
+  );
+}
+
+export function HomeViewAllMobileLink() {
+  const { ui } = useLanguage();
+  return (
+    <Link
+      href="/categories"
+      className="flex items-center text-primary font-medium hover:underline underline-offset-4"
+    >
+      {ui("home_view_all_tools")} <ArrowRight className="ml-1 h-4 w-4" />
+    </Link>
   );
 }
 

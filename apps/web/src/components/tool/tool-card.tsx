@@ -72,7 +72,7 @@ export function ToolCard({ tool }: ToolCardProps) {
             </span>
             {tool.price_inr_monthly && (
               <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">
-                ₹{tool.price_inr_monthly} / mo
+                ₹{tool.price_inr_monthly} {ui("common_per_month")}
               </span>
             )}
           </div>

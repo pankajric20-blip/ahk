@@ -53,6 +53,11 @@ const translations = {
     hinglish: "Maximum productivity ke liye hand-picked AI tools.",
   },
   home_view_all: { en: "View all", hi: "सभी देखें", hinglish: "Sab dekho" },
+  home_view_all_tools: {
+    en: "View all tools",
+    hi: "सभी टूल्स देखें",
+    hinglish: "Sab tools dekho",
+  },
   home_categories_title: {
     en: "Browse by Category",
     hi: "श्रेणी के अनुसार खोजें",

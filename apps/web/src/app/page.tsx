@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "AihKya - India ka AI Tools Directory | Hindi mein",
@@ -17,6 +16,8 @@ import {
   FeaturedSectionHeader,
   HomeSearchBar,
   HomeBadge,
+  HomeViewAllLink,
+  HomeViewAllMobileLink,
 } from "@/components/global/localized-sections";
 import { getLocale, localizeTools } from "@/lib/get-locale";
 
@@ -76,12 +77,7 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-10">
             <FeaturedSectionHeader />
-            <Link
-              href="/categories"
-              className="hidden sm:flex items-center text-primary font-medium hover:underline underline-offset-4 shrink-0"
-            >
-              View all <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+            <HomeViewAllLink />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -109,12 +105,7 @@ export default async function Home() {
                 ))}
           </div>
           <div className="mt-8 sm:hidden flex justify-center">
-            <Link
-              href="/categories"
-              className="flex items-center text-primary font-medium hover:underline underline-offset-4"
-            >
-              View all tools <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
+            <HomeViewAllMobileLink />
           </div>
         </div>
       </section>
