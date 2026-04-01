@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Filter } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ToolCard } from "@/components/tool/tool-card";
+import { getPricingKey } from "@/lib/pricing";
 
 interface CategoryPageContentProps {
   category: { name_en: string; name_hi: string | null; slug: string };
@@ -22,6 +23,10 @@ export function CategoryPageContent({
 }: CategoryPageContentProps) {
   const { t, ui } = useLanguage();
   const catName = t(category.name_en, category.name_hi);
+  // Translate the active pricing filter labels for display
+  const activePricingLabels = activePricing.map((v) =>
+    ui(getPricingKey(v.toLowerCase())),
+  );
 
   return (
     <div className="mb-12 space-y-4">
@@ -32,9 +37,9 @@ export function CategoryPageContent({
         {ui("cat_browse_desc")
           .replace("{n}", String(tools.length))
           .replace("{cat}", catName.toLowerCase())}
-        {activePricing.length > 0 && (
+        {activePricingLabels.length > 0 && (
           <span className="ml-1 text-sm text-primary">
-            ({ui("cat_filtered")} {activePricing.join(", ")})
+            ({ui("cat_filtered")} {activePricingLabels.join(", ")})
           </span>
         )}
       </p>
@@ -65,13 +70,16 @@ export function CategoryEmptyState({
   slug: string;
 }) {
   const { ui } = useLanguage();
+  const activePricingLabels = activePricing.map((v) =>
+    ui(getPricingKey(v.toLowerCase())),
+  );
   return (
     <div className="col-span-full py-12 text-center border rounded-xl border-dashed bg-muted/20">
       <p className="text-muted-foreground text-lg">
-        {activePricing.length > 0
+        {activePricingLabels.length > 0
           ? ui("cat_no_tools_filtered").replace(
               "{pricing}",
-              activePricing.join(" / "),
+              activePricingLabels.join(" / "),
             )
           : ui("cat_no_tools")}
       </p>

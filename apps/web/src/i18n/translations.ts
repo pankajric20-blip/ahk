@@ -121,6 +121,7 @@ const translations = {
     hi: "फ़िल्टर हटाएं",
     hinglish: "Filters hatao",
   },
+  filter_active: { en: "active", hi: "चालू", hinglish: "active" },
 
   // ── Tool Detail Page ─────────────────────────────────────
   tool_back: { en: "Back to Discover", hi: "वापस जाएं", hinglish: "Wapas jao" },
