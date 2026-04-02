@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -86,7 +86,7 @@ interface DashboardClientProps {
 }
 
 // ─── Avatar component ─────────────────────────────────────────────────────────
-function Avatar({ user }: { user: UserInfo }) {
+const Avatar = memo(function Avatar({ user }: { user: UserInfo }) {
   const initials = user.display_name
     .split(" ")
     .map((n) => n[0])
@@ -96,19 +96,20 @@ function Avatar({ user }: { user: UserInfo }) {
 
   if (user.avatar_url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={user.avatar_url}
         alt={user.display_name}
+        width={64}
+        height={64}
         className="w-full h-full object-cover"
       />
     );
   }
   return <span className="text-2xl font-bold text-primary">{initials}</span>;
-}
+});
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({
+const StatCard = memo(function StatCard({
   icon,
   label,
   value,
@@ -140,10 +141,10 @@ function StatCard({
       />
     </div>
   );
-}
+});
 
 // ─── Tool Logo ────────────────────────────────────────────────────────────────
-function ToolLogoSmall({
+const ToolLogoSmall = memo(function ToolLogoSmall({
   logoUrl,
   name,
 }: {
@@ -166,10 +167,10 @@ function ToolLogoSmall({
       {name.slice(0, 2).toUpperCase()}
     </span>
   );
-}
+});
 
 // ─── Star Rating ──────────────────────────────────────────────────────────────
-function StarRating({ rating }: { rating: number }) {
+const StarRating = memo(function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
@@ -184,12 +185,12 @@ function StarRating({ rating }: { rating: number }) {
       ))}
     </div>
   );
-}
+});
 
 // ─── Pricing label helper ─────────────────────────────────────────────────────
 
 // ─── Review status badge helper ───────────────────────────────────────────────
-function StatusBadge({
+const StatusBadge = memo(function StatusBadge({
   status,
   publishedLabel,
   pendingLabel,
@@ -225,7 +226,7 @@ function StatusBadge({
       {entry.label}
     </span>
   );
-}
+});
 
 // ─── Main Dashboard Component ─────────────────────────────────────────────────
 export function DashboardClient({

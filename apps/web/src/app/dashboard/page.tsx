@@ -7,7 +7,7 @@ import { DashboardClient } from "./dashboard-client";
 import { getLocale, localizeTools } from "@/lib/get-locale";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Aihkya",
+  title: "Dashboard | AihKya",
   description: "Manage your saved tools, reviews, and account settings.",
 };
 
@@ -24,73 +24,88 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+  // ── Round 1: Parallel — profile, bookmarks, reviews, locale ─────────────
+  const [{ data: profile }, { data: bookmarkRows }, { data: reviews }, locale] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "display_name, avatar_url, user_type, city, state, business_name, " +
+            "is_ai_champion, onboarding_completed, " +
+            "tools_saved, tools_reviewed, karma_score, helpful_votes_received",
+        )
+        .eq("id", user.id)
+        .maybeSingle(),
 
-  // Fetch saved tools with details
-  const { data: bookmarkRows } = await supabase
-    .from("saved_tools")
-    .select("tool_id, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(6);
+      supabase
+        .from("saved_tools")
+        .select("tool_id, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(6),
 
-  const locale = await getLocale();
+      supabase
+        .from("reviews")
+        .select("id, tool_id, rating, title, review_text, created_at, status")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
 
+      getLocale(),
+    ]);
+
+  // ── Round 2: Parallel — tool details for bookmarks and reviews ───────────
+  const bookmarkToolIds = (bookmarkRows ?? []).map((b: any) => b.tool_id);
+  const reviewToolIds = [
+    ...new Set((reviews ?? []).map((r: any) => r.tool_id)),
+  ];
+
+  const [{ data: toolData }, { data: reviewTools }] = await Promise.all([
+    bookmarkToolIds.length > 0
+      ? supabase
+          .from("ai_tools")
+          .select(
+            "id, slug, logo_url, pricing_model, rating_avg, rating_count, made_in_india, " +
+              "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
+              "description_en, description_hi, description_hinglish",
+          )
+          .in("id", bookmarkToolIds)
+      : Promise.resolve({ data: [] }),
+
+    reviewToolIds.length > 0
+      ? supabase
+          .from("ai_tools")
+          .select("id, name_en, slug, logo_url")
+          .in("id", reviewToolIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  // ── Assemble saved tools (preserve bookmark order) ───────────────────────
   let savedTools: any[] = [];
-  if (bookmarkRows && bookmarkRows.length > 0) {
-    const toolIds = bookmarkRows.map((b: any) => b.tool_id);
-    const { data: toolData } = await supabase
-      .from("ai_tools")
-      .select(
-        "id, slug, logo_url, pricing_model, rating_avg, rating_count, made_in_india, " +
-          "name_en, name_hi, name_hinglish, tagline_en, tagline_hi, tagline_hinglish, " +
-          "description_en, description_hi, description_hinglish",
-      )
-      .in("id", toolIds);
-    if (toolData) {
-      const localized = localizeTools(toolData as any[], locale);
-      const toolMap = new Map(localized.map((t) => [t.id, t]));
-      savedTools = toolIds.map((id: string) => toolMap.get(id)).filter(Boolean);
-    }
+  if (toolData && toolData.length > 0) {
+    const localized = localizeTools(toolData as any[], locale);
+    const toolMap = new Map(localized.map((t: any) => [t.id, t]));
+    savedTools = bookmarkToolIds
+      .map((id: string) => toolMap.get(id))
+      .filter(Boolean);
   }
 
-  // Fetch user reviews
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("id, tool_id, rating, title, review_text, created_at, status")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // Fetch tool names for reviews
+  // ── Assemble reviews with tool info ──────────────────────────────────────
   let reviewsWithTools: any[] = [];
   if (reviews && reviews.length > 0) {
-    const reviewToolIds = [...new Set(reviews.map((r: any) => r.tool_id))];
-    const { data: reviewTools } = await supabase
-      .from("ai_tools")
-      .select("id, name_en, slug, logo_url")
-      .in("id", reviewToolIds);
-    const toolMap = new Map((reviewTools || []).map((t: any) => [t.id, t]));
+    const toolMap = new Map((reviewTools ?? []).map((t: any) => [t.id, t]));
     reviewsWithTools = reviews.map((r: any) => ({
       ...r,
       tool: toolMap.get(r.tool_id),
     }));
   }
 
-  // Stats
-  const totalSaved = (profile as any)?.tools_saved ?? bookmarkRows?.length ?? 0;
-  const totalReviews = (profile as any)?.tools_reviewed ?? reviews?.length ?? 0;
-  const karmaScore = (profile as any)?.karma_score ?? 0;
-  const helpfulVotes = (profile as any)?.helpful_votes_received ?? 0;
-
-  const displayName =
-    (profile as any)?.display_name || user.email?.split("@")?.[0] || "User";
-
+  const p = profile as any;
+  const totalSaved = p?.tools_saved ?? bookmarkRows?.length ?? 0;
+  const totalReviews = p?.tools_reviewed ?? reviews?.length ?? 0;
+  const karmaScore = p?.karma_score ?? 0;
+  const helpfulVotes = p?.helpful_votes_received ?? 0;
+  const displayName = p?.display_name || user.email?.split("@")?.[0] || "User";
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString("en-IN", {
         year: "numeric",
@@ -103,13 +118,13 @@ export default async function DashboardPage() {
       user={{
         id: user.id,
         email: user.email ?? "",
-        avatar_url: (profile as any)?.avatar_url ?? null,
+        avatar_url: p?.avatar_url ?? null,
         display_name: displayName,
-        user_type: (profile as any)?.user_type ?? null,
-        city: (profile as any)?.city ?? null,
-        state: (profile as any)?.state ?? null,
-        business_name: (profile as any)?.business_name ?? null,
-        is_ai_champion: (profile as any)?.is_ai_champion ?? false,
+        user_type: p?.user_type ?? null,
+        city: p?.city ?? null,
+        state: p?.state ?? null,
+        business_name: p?.business_name ?? null,
+        is_ai_champion: p?.is_ai_champion ?? false,
         member_since: memberSince,
       }}
       stats={{

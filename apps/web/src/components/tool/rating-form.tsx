@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { Star, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { submitReview } from "@/actions/reviews";
@@ -36,46 +36,64 @@ export function RatingForm({
   const [isPending, startTransition] = useTransition();
   const { language, ui } = useLanguage();
 
-  const handleRatingClick = (newRating: number) => {
-    if (!isLoggedIn) {
-      toast.error(ui("review_form_error_login"));
-      return;
-    }
-    setRating(newRating);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!isLoggedIn) {
-      toast.error(ui("review_form_error_login"));
-      return;
-    }
-
-    if (rating === 0) {
-      toast.error(ui("review_form_error_rating"));
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("tool_id", toolId);
-    formData.append("rating", rating.toString());
-    formData.append("title", title);
-    formData.append("review_text", reviewText);
-    formData.append("use_case", useCase);
-    formData.append("usage_duration", usageDuration);
-    formData.append("language", language);
-    formData.append("slug", slug);
-
-    startTransition(async () => {
-      const result = await submitReview(formData);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(ui("review_form_success"));
+  const handleRatingClick = useCallback(
+    (newRating: number) => {
+      if (!isLoggedIn) {
+        toast.error(ui("review_form_error_login"));
+        return;
       }
-    });
-  };
+      setRating(newRating);
+    },
+    [isLoggedIn, ui],
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      if (!isLoggedIn) {
+        toast.error(ui("review_form_error_login"));
+        return;
+      }
+
+      if (rating === 0) {
+        toast.error(ui("review_form_error_rating"));
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("tool_id", toolId);
+      formData.append("rating", rating.toString());
+      formData.append("title", title);
+      formData.append("review_text", reviewText);
+      formData.append("use_case", useCase);
+      formData.append("usage_duration", usageDuration);
+      formData.append("language", language);
+      formData.append("slug", slug);
+
+      startTransition(async () => {
+        const result = await submitReview(formData);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success(ui("review_form_success"));
+        }
+      });
+    },
+    [
+      isLoggedIn,
+      rating,
+      toolId,
+      title,
+      reviewText,
+      useCase,
+      usageDuration,
+      language,
+      slug,
+      ui,
+      startTransition,
+    ],
+  );
 
   return (
     <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">

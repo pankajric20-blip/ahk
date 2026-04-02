@@ -4,7 +4,7 @@ import { createBrowserClient } from "@aihkya/db";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "next/navigation";
@@ -30,25 +30,29 @@ function AuthForm() {
 
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
+  // Store `next` in a ref so the auth listener always reads the latest value
+  // without needing to re-subscribe when the search param changes.
+  const nextRef = useRef(next);
+  nextRef.current = next;
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { theme } = useTheme();
   const router = useRouter();
 
-  // Listen for auth state changes — if user logs in via email, redirect them
+  // Subscribe once — read nextRef.current inside the callback to avoid
+  // unnecessary unsubscribe/resubscribe cycles on every render.
   useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // If they successfully sign in directly (e.g. email/pwd), redirect them immediately
-        router.push(next);
+        router.push(nextRef.current);
         router.refresh();
       }
     });
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, router, next]);
+  }, [supabase, router]); // nextRef is stable — intentionally omitted
 
   // Parse errors out of the URL (both search and hash)
   useEffect(() => {

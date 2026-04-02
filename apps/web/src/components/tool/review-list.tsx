@@ -59,6 +59,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
                     alt={review.user?.display_name || "User"}
                     width={48}
                     height={48}
+                    loading="lazy"
                     className="object-cover w-full h-full"
                   />
                 ) : (

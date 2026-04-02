@@ -54,11 +54,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const { data } = await supabase
     .from("task_categories")
-    .select("*")
+    .select(
+      "id, slug, name_en, name_hi, name_hinglish, description_en, description_hi, description_hinglish",
+    )
     .eq("slug", p.slug)
     .single();
   const category: any = data;
   if (!category) notFound();
+
+  // Validate pricing filter values against known allowlist to prevent unexpected DB queries
+  const VALID_PRICING = new Set(["free", "freemium", "paid"]);
+  const sanitizedPricing = activePricing.filter((v) =>
+    VALID_PRICING.has(v.toLowerCase()),
+  );
 
   const locale = await getLocale();
 
@@ -75,10 +83,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     .order("is_sponsored", { ascending: false })
     .order("rating_avg", { ascending: false });
 
-  if (activePricing.length > 0) {
+  if (sanitizedPricing.length > 0) {
     query = query.in(
       "pricing_model",
-      activePricing.map((p) => p.toLowerCase()),
+      sanitizedPricing.map((p) => p.toLowerCase()),
     );
   }
 
@@ -95,7 +103,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <CategoryPageContent
         category={category}
         tools={tools}
-        activePricing={activePricing}
+        activePricing={sanitizedPricing}
         slug={p.slug}
       />
 
@@ -120,7 +128,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           {tools.length > 0 ? (
             tools.map((tool: any) => <ToolCard key={tool.id} tool={tool} />)
           ) : (
-            <CategoryEmptyState activePricing={activePricing} slug={p.slug} />
+            <CategoryEmptyState
+              activePricing={sanitizedPricing}
+              slug={p.slug}
+            />
           )}
         </div>
       </div>

@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          {
+            // Enforce HTTPS for 1 year; include subdomains
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
         ],
       },
       // Cache Next.js static bundles (JS/CSS) forever — they are fingerprinted
